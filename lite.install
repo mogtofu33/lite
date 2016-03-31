@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the lite module.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function lite_requirements($phase) {
+  $requirements = array();
+
+  // Only check requirements during runtime.
+  if ($phase == 'runtime') {
+    // Check if the LITE CKEditor plugin library is installed.
+    if (($library = libraries_detect('lite')) && !empty($library['installed'])) {
+      $requirements['lite_library'] = array(
+        'title' => t('LITE CKEditor plugin'),
+        'value' => $library['version'],
+        'severity' => REQUIREMENT_OK,
+      );
+    }
+    else {
+      $requirements['lite_library'] = array(
+        'title' => t('LITE CKEditor plugin'),
+        'value' => t('Not installed'),
+        'description' => $library['error message'],
+        'severity' => REQUIREMENT_ERROR,
+      );
+    }
+  }
+
+  return $requirements;
+}

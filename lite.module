@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * @file
+ * Integrates the lite track changes plugin for CKEditor with Drupal.
+ */
+
+/**
+ * Implements hook_libraries_info().
+ */
+function lite_libraries_info() {
+  return array(
+    'lite' => array(
+      'name' => 'LITE',
+      'vendor url' => 'http://www.loopindex.com/portfolio-item/track-changes-plugin/',
+      'download url' => 'http://ckeditor.com/addon/lite',
+      'version arguments' => array(
+        'file' => 'plugin.js',
+        // /* Source version: 1.2.25 */
+        'pattern' => '/Source version: (\d+\.\d+\.\d+)/',
+        'lines' => 1,
+      ),
+      'files' => array(
+        'js' => array(
+          'lite-includes.js',
+          'lite-interface.js',
+          'plugin.js',
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_filter_js_settings_alter().
+ */
+function lite_filter_js_settings_alter(&$settings) {
+  global $user;
+
+  foreach ($settings as $format => $info) {
+    if ($info['editor'] == 'ckeditor') {
+      // Pass the current user's name and ID to lite to associate with changes.
+      $settings[$format]['editorSettings']['lite'] = array(
+        'userId' => $user->uid,
+        'userName' => format_username($user),
+      );
+    }
+  }
+}
