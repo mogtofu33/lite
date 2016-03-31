@@ -9,25 +9,58 @@
  * Implements hook_requirements().
  */
 function lite_requirements($phase) {
-  $requirements = array();
+  $requirements = [];
 
   // Only check requirements during runtime.
   if ($phase == 'runtime') {
     // Check if the LITE CKEditor plugin library is installed.
-    if (($library = libraries_detect('lite')) && !empty($library['installed'])) {
-      $requirements['lite_library'] = array(
-        'title' => t('LITE CKEditor plugin'),
-        'value' => $library['version'],
-        'severity' => REQUIREMENT_OK,
-      );
+    if (\Drupal::moduleHandler()->moduleExists('libraries')) {
+      if (($library = libraries_detect('lite')) && !empty($library['installed'])) {
+        $requirements['lite_library'] = array(
+          'title' => t('LITE CKEditor plugin'),
+          'value' => $library['version'],
+          'severity' => REQUIREMENT_OK,
+        );
+      }
+      else {
+        $requirements['lite_library'] = array(
+          'title' => t('LITE CKEditor plugin'),
+          'value' => t('Not installed'),
+          'description' => $library['error message'],
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
     }
     else {
-      $requirements['lite_library'] = array(
-        'title' => t('LITE CKEditor plugin'),
-        'value' => t('Not installed'),
-        'description' => $library['error message'],
-        'severity' => REQUIREMENT_ERROR,
-      );
+      $available = TRUE;
+
+      // Verify that all of the LITE CKEditor plugin JS files exist.
+      /** @var \Drupal\Core\Asset\LibraryDiscoveryInterface $library_discovery */
+      $library_discovery = \Drupal::service('library.discovery');
+      $library = $library_discovery->getLibraryByName('lite', 'lite');
+
+      foreach ($library['js'] as $definition) {
+        if (!file_exists($definition['data'])) {
+          $available = FALSE;
+          continue;
+        }
+      }
+
+      if ($available) {
+        $requirements['lite_library'] = array(
+          'title' => t('LITE CKEditor plugin'),
+          'value' => $library['version'],
+          'severity' => REQUIREMENT_OK,
+        );
+      }
+      else {
+        $requirements['lite_library'] = array(
+          'title' => t('LITE CKEditor plugin'),
+          'value' => t('Not installed'),
+          'description' => t('The LITE library could not be found.'),
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
     }
   }
 
