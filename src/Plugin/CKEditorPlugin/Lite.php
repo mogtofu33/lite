@@ -25,14 +25,7 @@ class Lite extends CKEditorPluginBase {
    * {@inheritdoc}
    */
   public function getFile() {
-    $path = '/libraries/lite';
-
-    // Optionally use the Libraries module to determine the library path.
-    if (\Drupal::moduleHandler()->moduleExists('libraries')) {
-      $path = libraries_get_path('lite');
-    }
-
-    return $path . '/plugin.js';
+    return libraries_get_path('lite') . '/plugin.js';
   }
 
   /**
@@ -53,12 +46,7 @@ class Lite extends CKEditorPluginBase {
    * {@inheritdoc}
    */
   public function getButtons() {
-    $path = '/libraries/lite';
-
-    // Optionally use the Libraries module to determine the library path.
-    if (\Drupal::moduleHandler()->moduleExists('libraries')) {
-      $path = libraries_get_path('lite');
-    }
+    $path = libraries_get_path('lite');
 
     return array(
       'lite-acceptall' => array(

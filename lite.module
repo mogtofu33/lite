@@ -30,17 +30,3 @@ function lite_libraries_info() {
     ],
   ];
 }
-
-/**
- * Implements hook_library_info_alter().
- */
-function lite_library_info_alter(&$libraries, $extension) {
-  // Optionally use the Libraries module to determine library paths.
-  if ($extension == 'lite' && \Drupal::moduleHandler()->moduleExists('libraries')) {
-    $path = libraries_get_path('lite');
-
-    $libraries['lite']['js'] = ['/' . $path . '/lite-includes.js' => []];
-    $libraries['lite']['js'] = ['/' . $path . '/lite-interface.js' => []];
-    $libraries['lite']['js'] = ['/' . $path . '/plugin.js' => []];
-  }
-}
