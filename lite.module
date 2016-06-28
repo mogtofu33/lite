@@ -6,6 +6,32 @@
  */
 
 /**
+ * Implements hook_libraries_info().
+ */
+function lite_libraries_info() {
+  return [
+    'lite' => [
+      'name' => 'LITE',
+      'vendor url' => 'http://www.loopindex.com/portfolio-item/track-changes-plugin/',
+      'download url' => 'http://ckeditor.com/addon/lite',
+      'version arguments' => [
+        'file' => 'plugin.js',
+        // /* Source version: 1.2.26 */
+        'pattern' => '/Source version: (\d+\.\d+\.\d+)/',
+        'lines' => 1,
+      ],
+      'files' => [
+        'js' => [
+          'lite-includes.js',
+          'lite-interface.js',
+          'plugin.js',
+        ],
+      ],
+    ],
+  ];
+}
+
+/**
  * Implements hook_library_info_alter().
  */
 function lite_library_info_alter(&$libraries, $extension) {
