@@ -25,7 +25,9 @@ class Lite extends CKEditorPluginBase {
    * {@inheritdoc}
    */
   public function getFile() {
-    return libraries_get_path('lite') . '/plugin.js';
+    $library = libraries_detect('lite');
+
+    return $library['library path'] . '/plugin.js';
   }
 
   /**
@@ -46,32 +48,32 @@ class Lite extends CKEditorPluginBase {
    * {@inheritdoc}
    */
   public function getButtons() {
-    $path = libraries_get_path('lite');
+    $library = libraries_detect('lite');
 
     return array(
       'lite-acceptall' => array(
         'label' => t('Accept all changes'),
-        'image' => $path . '/icons/lite-acceptall.png',
+        'image' => $library['library path'] . '/icons/lite-acceptall.png',
       ),
       'lite-rejectall' => array(
         'label' => t('Reject all changes'),
-        'image' => $path . '/icons/lite-rejectall.png',
+        'image' => $library['library path'] . '/icons/lite-rejectall.png',
       ),
       'lite-acceptone' => array(
         'label' => t('Accept change'),
-        'image' => $path . '/icons/lite-acceptone.png',
+        'image' => $library['library path'] . '/icons/lite-acceptone.png',
       ),
       'lite-rejectone' => array(
         'label' => t('Reject change'),
-        'image' => $path . '/icons/lite-rejectone.png',
+        'image' => $library['library path'] . '/icons/lite-rejectone.png',
       ),
       'lite-toggleshow' => array(
         'label' => t('Show/hide tracked changes'),
-        'image' => $path . '/icons/lite-toggleshow.png',
+        'image' => $library['library path'] . '/icons/lite-toggleshow.png',
       ),
       'lite-toggletracking' => array(
         'label' => t('Start/stop tracking changes'),
-        'image' => $path . '/icons/lite-toggletracking.png',
+        'image' => $library['library path'] . '/icons/lite-toggletracking.png',
       ),
     );
   }
