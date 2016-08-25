@@ -5,6 +5,8 @@
  * Integrates the lite track changes plugin for CKEditor with Drupal.
  */
 
+use Drupal\Component\Utility\Html;
+
 /**
  * Implements hook_libraries_info().
  */
@@ -29,4 +31,70 @@ function lite_libraries_info() {
       ],
     ],
   ];
+}
+
+/**
+ * Implements hook_entity_view_alter().
+ */
+function lite_entity_view_alter(array &$build, Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
+  // Add a #post_render callback to act on the rendered HTML of the entity.
+  $build['#post_render'][] = '_lite_entity_post_render';
+}
+
+/**
+ * Hides tracking HTML when viewing entities.
+ */
+function _lite_entity_post_render($markup, $element) {
+  $output = $markup;
+
+  // Only look for tracking elements when an associated class is detected.
+  if (strpos($markup, 'ice-ins') !== FALSE || strpos($markup, 'ice-del') !== FALSE) {
+    $dom = Html::load($markup);
+    $xpath = new \DOMXPath($dom);
+
+    // Remove proposed insertions with the "ice-ins" class.
+    foreach ($xpath->query("//ins[contains(concat(' ', normalize-space(@class), ' '), ' ice-ins ')]") as $node) {
+      /** @var \DOMElement $node */
+      $node->parentNode->removeChild($node);
+    }
+
+    // Keep proposed deletions with the "ice-del" class but remove markers.
+    foreach ($xpath->query("//del[contains(concat(' ', normalize-space(@class), ' '), ' ice-del ')]") as $node) {
+      /** @var \DOMElement $node */
+      $text = $node->textContent;
+      _lite_replace_node_content($node, $text);
+    }
+
+    $output = Html::serialize($dom);
+  }
+
+  return $output;
+}
+
+/**
+ * Replace the contents of a DOMNode.
+ *
+ * @param \DOMNode $node
+ *   A DOMNode object.
+ * @param string $content
+ *   The text or HTML that will replace the contents of $node.
+ */
+function _lite_replace_node_content(\DOMNode &$node, $content) {
+  if (strlen($content)) {
+    // Load the content into a new DOMDocument and retrieve the DOM nodes.
+    $replacement_nodes = Html::load($content)->getElementsByTagName('body')
+      ->item(0)
+      ->childNodes;
+  }
+  else {
+    $replacement_nodes = [$node->ownerDocument->createTextNode('')];
+  }
+
+  foreach ($replacement_nodes as $replacement_node) {
+    // Import the replacement node from the new DOMDocument into the original
+    // one, importing also the child nodes of the replacement node.
+    $replacement_node = $node->ownerDocument->importNode($replacement_node, TRUE);
+    $node->parentNode->insertBefore($replacement_node, $node);
+  }
+  $node->parentNode->removeChild($node);
 }
