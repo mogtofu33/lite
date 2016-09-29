@@ -152,9 +152,6 @@ function lite_filter_process_format(&$element, FormStateInterface $form_state, &
 
     }
   }
-  else {
-    return $element;
-  }
 
   return $element;
 }
