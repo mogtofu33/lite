@@ -98,3 +98,63 @@ function _lite_replace_node_content(\DOMNode &$node, $content) {
   }
   $node->parentNode->removeChild($node);
 }
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function lite_element_info_alter(array &$types) {
+  // Our process callback must run immediately after
+  // TextFormat::processFormat().
+  if (isset($types['text_format']) && isset($types['text_format']['#process'])) {
+    $search_value = ['Drupal\filter\Element\TextFormat', 'processFormat'];
+    $key = array_search($search_value, $types['text_format']['#process']);
+
+    if ($key !== FALSE) {
+      $key++;
+      array_splice($types['text_format']['#process'], $key, 0, 'lite_filter_process_format');
+    }
+    else {
+      $types['text_format']['#process'][] = 'lite_filter_process_format';
+    }
+  }
+}
+
+/**
+ * Process callback for form elements that have a text format selector attached.
+ *
+ * This callback runs after filter_process_format() and performs additional
+ * modifications to the form element.
+ *
+ * @see \Drupal\filter\Element\TextFormat::processFormat()
+ */
+function lite_filter_process_format(&$element, FormStateInterface $form_state, &$complete_form) {
+  // Retrieve the form object from $form_state.
+  $form_object = $form_state->getFormObject();
+
+  // Check to see if we're working with a content entity form.
+  if ($form_object instanceof Drupal\Core\Entity\ContentEntityForm) {
+    // Retrieve the entity related to the form.
+    $entity = $form_state->getFormObject()->getEntity();
+
+    // If the entity is new (being created) then disable tracking in order to
+    // prevent users from becoming confused if their initial content does not
+    // show up after saving the entity unless they've pressed the "accept all
+    // changes" button.
+    if ($entity->isNew()) {
+      // Retrieve the available formats for the current text_format.
+      $format_options = $element['format']['format']['#options'];
+
+      // Loop through each of the available formats, adding a JS setting which
+      // disabled tracking for each.
+      foreach ($format_options as $format => $label) {
+        $element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings']['lite']['isTracking'] = FALSE;
+      }
+
+    }
+  }
+  else {
+    return $element;
+  }
+
+  return $element;
+}
