@@ -142,15 +142,28 @@ function lite_filter_process_format(&$element, FormStateInterface $form_state, &
     // show up after saving the entity unless they've pressed the "accept all
     // changes" button.
     if ($entity->isNew()) {
-      // Retrieve the available formats for the current text_format.
-      $format_options = $element['format']['format']['#options'];
+      // Append #pre_render callback to disable tracking prior to rendering.
+      $element['#pre_render'][] = 'lite_disable_tracking';
+    }
+  }
 
-      // Loop through each of the available formats, adding a JS setting which
-      // disabled tracking for each.
-      foreach ($format_options as $format => $label) {
-        $element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings']['lite']['isTracking'] = FALSE;
-      }
+  return $element;
+}
 
+/**
+ * Pre-render function to disable text tracking on new entity creation.
+ *
+ * @see lite_filter_process_format()
+ */
+function lite_disable_tracking($element) {
+  // Retrieve the available formats for the current text_format.
+  $format_options = $element['format']['format']['#options'];
+
+  // Loop through each of the available formats, adding a JS setting which
+  // disabled tracking for each.
+  foreach ($format_options as $format => $label) {
+    if (isset($element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings'])) {
+      $element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings']['lite']['isTracking'] = FALSE;
     }
   }
 
