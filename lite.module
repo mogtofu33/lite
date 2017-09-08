@@ -5,8 +5,9 @@
  * Integrates the lite track changes plugin for CKEditor with Drupal.
  */
 
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Entity\ContentEntityForm;
+use Drupal\user\Entity\Role;
 
 /**
  * Implements hook_libraries_info().
@@ -32,72 +33,6 @@ function lite_libraries_info() {
       ],
     ],
   ];
-}
-
-/**
- * Implements hook_entity_view_alter().
- */
-function lite_entity_view_alter(array &$build, Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
-  // Add a #post_render callback to act on the rendered HTML of the entity.
-  $build['#post_render'][] = '_lite_entity_post_render';
-}
-
-/**
- * Hides tracking HTML when viewing entities.
- */
-function _lite_entity_post_render($markup, $element) {
-  $output = $markup;
-
-  // Only look for tracking elements when an associated class is detected.
-  if (strpos($markup, 'ice-ins') !== FALSE || strpos($markup, 'ice-del') !== FALSE) {
-    $dom = Html::load($markup);
-    $xpath = new \DOMXPath($dom);
-
-    // Remove proposed insertions with the "ice-ins" class.
-    foreach ($xpath->query("//ins[contains(concat(' ', normalize-space(@class), ' '), ' ice-ins ')]") as $node) {
-      /** @var \DOMElement $node */
-      $node->parentNode->removeChild($node);
-    }
-
-    // Keep proposed deletions with the "ice-del" class but remove markers.
-    foreach ($xpath->query("//del[contains(concat(' ', normalize-space(@class), ' '), ' ice-del ')]") as $node) {
-      /** @var \DOMElement $node */
-      $text = $node->textContent;
-      _lite_replace_node_content($node, $text);
-    }
-
-    $output = Html::serialize($dom);
-  }
-
-  return $output;
-}
-
-/**
- * Replace the contents of a DOMNode.
- *
- * @param \DOMNode $node
- *   A DOMNode object.
- * @param string $content
- *   The text or HTML that will replace the contents of $node.
- */
-function _lite_replace_node_content(\DOMNode &$node, $content) {
-  if (strlen($content)) {
-    // Load the content into a new DOMDocument and retrieve the DOM nodes.
-    $replacement_nodes = Html::load($content)->getElementsByTagName('body')
-      ->item(0)
-      ->childNodes;
-  }
-  else {
-    $replacement_nodes = [$node->ownerDocument->createTextNode('')];
-  }
-
-  foreach ($replacement_nodes as $replacement_node) {
-    // Import the replacement node from the new DOMDocument into the original
-    // one, importing also the child nodes of the replacement node.
-    $replacement_node = $node->ownerDocument->importNode($replacement_node, TRUE);
-    $node->parentNode->insertBefore($replacement_node, $node);
-  }
-  $node->parentNode->removeChild($node);
 }
 
 /**
@@ -133,7 +68,8 @@ function lite_filter_process_format(&$element, FormStateInterface $form_state, &
   $form_object = $form_state->getFormObject();
 
   // Check to see if we're working with a content entity form.
-  if ($form_object instanceof Drupal\Core\Entity\ContentEntityForm) {
+  if ($form_object instanceof ContentEntityForm) {
+
     // Retrieve the entity related to the form.
     $entity = $form_state->getFormObject()->getEntity();
 
@@ -142,7 +78,6 @@ function lite_filter_process_format(&$element, FormStateInterface $form_state, &
     // show up after saving the entity unless they've pressed the "accept all
     // changes" button.
     if ($entity->isNew()) {
-      // Append #pre_render callback to disable tracking prior to rendering.
       $element['#pre_render'][] = 'lite_disable_tracking';
     }
   }
@@ -163,9 +98,106 @@ function lite_disable_tracking($element) {
   // disabled tracking for each.
   foreach ($format_options as $format => $label) {
     if (isset($element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings'])) {
-      $element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings']['lite']['isTracking'] = FALSE;
+      $editor_settings = &$element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings'];
+      // If Do not start on new entity is checked.
+      if (isset($editor_settings['lite']['disable_new']) && $editor_settings['lite']['disable_new']) {
+        // Disable tracking passing variables directly to Lite plugin.
+        $editor_settings['lite']['isTracking'] = FALSE;
+      }
     }
   }
 
   return $element;
+}
+
+
+/**
+ * Return user permissions filtered to this module.
+ *
+ * @param NULL|Drupal\user\Entity\User $user
+ *   Drupal User object or NULL to load current user.
+ *
+ * @return Array
+ *   List of lite permissions without spaces.
+ */
+function lite_get_permissions($user = NULL) {
+  $permissions = $user_permissions = [];
+
+  if (!$user) {
+    $user = \Drupal::currentUser();
+  }
+
+  $roles = $user->getRoles();
+  // Specific Admin case, because Drupal return an empty array.
+  foreach ($roles as $role) {
+    $role = Role::load($role);
+    if ($role->isAdmin()) {
+      $user_permissions =  array_keys(\Drupal::service('user.permissions')->getPermissions());
+    }
+  }
+
+  // For a regular user we load permissions.
+  if (!count($user_permissions)) {
+    $all_user_permissions = user_role_permissions($roles);
+    if (count($all_user_permissions)) {
+      $user_permissions = array_merge($all_user_permissions, $all_user_permissions);
+      $user_permissions = end($user_permissions);
+    }
+  }
+
+  // We filter permissions to get only lite related.
+  foreach ($user_permissions as $permission) {
+    if (strpos($permission, 'lite') !== FALSE) {
+      $permissions[] = str_replace(' ', '_', str_replace('lite ', '', $permission));
+    }
+  }
+
+  return $permissions;
+}
+
+
+/**
+ * Permission callback for Lite's lite.permissions.yml.
+ *
+ * @see lite.permissions.yml
+ */
+function lite_permissions() {
+  $permissions = [];
+  $formats = [];
+
+  // We can stop here if permission by formats is not enable.
+  $config = \Drupal::config('lite.settings');
+  $permissions_by_formats = $config->get('permissions_by_formats');
+  if (!$permissions_by_formats) {
+    return $permissions;
+  }
+
+  // Build a list of formats with lite enabled.
+  $filter_formats = filter_formats();
+  foreach ($filter_formats as $format => $filter_format) {
+    $filters = $filter_format->get('filters');
+    if (isset($filters['lite'])) {
+      $formats[$filter_format->id()] = $filter_format->label();
+    }
+  }
+
+  // Create permissions for each text format.
+  $tracking_permissions = [
+    'lite toggle' => [
+      'base_title' => '%format: May enable or disable tracking',
+    ],
+    'lite resolve' => [
+      'base_title' => '%format: May resolve changes',
+    ],
+  ];
+  foreach ($formats as $id => $format_name) {
+    foreach ($tracking_permissions as $tracking_permission => $tracking_info) {
+      $permissions[$tracking_permission . ' ' . $id] = [
+        'title' => t($tracking_info['base_title'], ['%format' => $format_name]),
+        'description' => t('Ensure user can use this format to be able to ensure this permission.'),
+      ];
+    }
+  }
+
+  return $permissions;
 }

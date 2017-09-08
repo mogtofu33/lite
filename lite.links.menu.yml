@@ -1,0 +1,5 @@
+lite.lite_settings_form:
+  title: 'Lite'
+  description: 'Configure lite plugin.'
+  parent: system.admin_config_content
+  route_name: lite.lite_settings_form

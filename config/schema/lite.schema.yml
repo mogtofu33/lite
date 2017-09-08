@@ -1,0 +1,12 @@
+# Schema for the configuration files of the Lite module.
+
+lite.settings:
+  type: config_object
+  label: 'Lite settings'
+  mapping:
+    tooltipTemplate:
+      type: text
+      label: 'Tracking tooltip template'
+    permissions_by_formats:
+      type: boolean
+      label: 'Permissions by formats'

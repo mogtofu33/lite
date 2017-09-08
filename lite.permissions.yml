@@ -1,0 +1,8 @@
+lite toggle:
+  title: ' May enable or disable tracking on <em>all text format</em>'
+  description: 'User can enable tracking but not disable it on <em>all text formats</em> with Lite filter enabled.'
+lite resolve:
+  title: 'May resolve tracked changes on <em>all text format</em>'
+  description: 'User may accept or reject any changes from tracking on <em>all text formats</em> with Lite filter enabled.'
+permission_callbacks:
+  - lite_permissions

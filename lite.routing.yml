@@ -1,0 +1,9 @@
+lite.lite_settings_form:
+  path: '/admin/config/content/lite/settings'
+  defaults:
+    _form: '\Drupal\lite\Form\LiteSettingsForm'
+    _title: 'Lite'
+  requirements:
+    _permission: 'administer filters'
+  options:
+    _admin_route: TRUE
