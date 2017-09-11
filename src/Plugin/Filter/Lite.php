@@ -12,7 +12,7 @@ use Drupal\Component\Utility\Html;
  *
  * @Filter(
  *   id = "lite",
- *   title = @Translation("Lite Filter"),
+ *   title = @Translation("Hide Lite changes tracking"),
  *   description = @Translation("Hide &lt;ins&gt; and &lt;del&gt; markup from Lite tracking changes."),
  *   type = Drupal\filter\Plugin\FilterInterface::TYPE_TRANSFORM_REVERSIBLE,
  *   settings = {
