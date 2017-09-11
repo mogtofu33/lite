@@ -8,10 +8,12 @@ use Drupal\filter\Plugin\FilterBase;
 use Drupal\Component\Utility\Html;
 
 /**
+ * Defines the "lite" filter.
+ *
  * @Filter(
  *   id = "lite",
  *   title = @Translation("Lite Filter"),
- *   description = @Translation("Provide filter to handle &lt;ins&gt; and &lt;del&gt; markup from Lite tracking changes."),
+ *   description = @Translation("Hide &lt;ins&gt; and &lt;del&gt; markup from Lite tracking changes."),
  *   type = Drupal\filter\Plugin\FilterInterface::TYPE_TRANSFORM_REVERSIBLE,
  *   settings = {
  *     "clean" = 0,
@@ -27,6 +29,7 @@ class Lite extends FilterBase {
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $form['clean'] = [
       '#title' => t('Clean empty markup'),
+      '#description' => $this->t('If a change or a list of changes is included in a list or a container tag, the changes will be hidden but not the container tag. In some cases, like for list or Blockquote, an empty markup will be visible. Use this option to remove empty tags.'),
       '#type' => 'checkbox',
       '#default_value' => $this->settings['clean'],
       '#attributes' => [
@@ -58,6 +61,13 @@ class Lite extends FilterBase {
     }
 
     return $result;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function tips($long = FALSE) {
+    return $this->t('Track changes will be use for this content if enable.');
   }
 
   /**

@@ -20,7 +20,7 @@ function lite_libraries_info() {
       'download url' => 'http://ckeditor.com/addon/lite',
       'version arguments' => [
         'file' => 'plugin.js',
-        // /* Source version: 1.2.26 */
+        // /* Source version: 1.2.28 */.
         'pattern' => '/Source version: (\d+\.\d+\.\d+)/',
         'lines' => 1,
       ],
@@ -73,10 +73,8 @@ function lite_filter_process_format(&$element, FormStateInterface $form_state, &
     // Retrieve the entity related to the form.
     $entity = $form_state->getFormObject()->getEntity();
 
-    // If the entity is new (being created) then disable tracking in order to
-    // prevent users from becoming confused if their initial content does not
-    // show up after saving the entity unless they've pressed the "accept all
-    // changes" button.
+    // If the entity is new (being created) then check plugin option to disable
+    // tracking.
     if ($entity->isNew()) {
       $element['#pre_render'][] = 'lite_disable_tracking';
     }
@@ -110,14 +108,13 @@ function lite_disable_tracking($element) {
   return $element;
 }
 
-
 /**
  * Return user permissions filtered to this module.
  *
- * @param NULL|Drupal\user\Entity\User $user
+ * @param null|Drupal\user\Entity\User $user
  *   Drupal User object or NULL to load current user.
  *
- * @return Array
+ * @return array
  *   List of lite permissions without spaces.
  */
 function lite_get_permissions($user = NULL) {
@@ -132,7 +129,7 @@ function lite_get_permissions($user = NULL) {
   foreach ($roles as $role) {
     $role = Role::load($role);
     if ($role->isAdmin()) {
-      $user_permissions =  array_keys(\Drupal::service('user.permissions')->getPermissions());
+      $user_permissions = array_keys(\Drupal::service('user.permissions')->getPermissions());
     }
   }
 
@@ -155,7 +152,6 @@ function lite_get_permissions($user = NULL) {
   return $permissions;
 }
 
-
 /**
  * Permission callback for Lite's lite.permissions.yml.
  *
@@ -174,7 +170,7 @@ function lite_permissions() {
 
   // Build a list of formats with lite enabled.
   $filter_formats = filter_formats();
-  foreach ($filter_formats as $format => $filter_format) {
+  foreach ($filter_formats as $filter_format) {
     $filters = $filter_format->get('filters');
     if (isset($filters['lite'])) {
       $formats[$filter_format->id()] = $filter_format->label();

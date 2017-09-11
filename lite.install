@@ -15,19 +15,19 @@ function lite_requirements($phase) {
   if ($phase == 'runtime') {
     // Check if the LITE CKEditor plugin library is installed.
     if (($library = libraries_detect('lite')) && !empty($library['installed'])) {
-      $requirements['lite_library'] = array(
+      $requirements['lite_library'] = [
         'title' => t('LITE CKEditor plugin'),
         'value' => $library['version'],
         'severity' => REQUIREMENT_OK,
-      );
+      ];
     }
     else {
-      $requirements['lite_library'] = array(
+      $requirements['lite_library'] = [
         'title' => t('LITE CKEditor plugin'),
         'value' => t('Not installed'),
         'description' => $library['error message'],
         'severity' => REQUIREMENT_ERROR,
-      );
+      ];
     }
   }
 

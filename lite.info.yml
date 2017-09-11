@@ -5,5 +5,5 @@ package: Filters
 configure: lite.lite_settings_form
 core: 8.x
 dependencies:
-  - ckeditor
-  - libraries
+  - drupal:ckeditor
+  - drupal:libraries

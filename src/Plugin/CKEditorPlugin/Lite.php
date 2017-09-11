@@ -93,32 +93,32 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
   public function getButtons() {
     $library = libraries_detect('lite');
 
-    return array(
-      'lite-acceptall' => array(
+    return [
+      'lite-acceptall' => [
         'label' => t('Accept all changes'),
         'image' => $library['library path'] . '/icons/lite-acceptall.png',
-      ),
-      'lite-rejectall' => array(
+      ],
+      'lite-rejectall' => [
         'label' => t('Reject all changes'),
         'image' => $library['library path'] . '/icons/lite-rejectall.png',
-      ),
-      'lite-acceptone' => array(
+      ],
+      'lite-acceptone' => [
         'label' => t('Accept change'),
         'image' => $library['library path'] . '/icons/lite-acceptone.png',
-      ),
-      'lite-rejectone' => array(
+      ],
+      'lite-rejectone' => [
         'label' => t('Reject change'),
         'image' => $library['library path'] . '/icons/lite-rejectone.png',
-      ),
-      'lite-toggleshow' => array(
+      ],
+      'lite-toggleshow' => [
         'label' => t('Show/hide tracked changes'),
         'image' => $library['library path'] . '/icons/lite-toggleshow.png',
-      ),
-      'lite-toggletracking' => array(
+      ],
+      'lite-toggletracking' => [
         'label' => t('Start/stop tracking changes'),
         'image' => $library['library path'] . '/icons/lite-toggletracking.png',
-      ),
-    );
+      ],
+    ];
   }
 
   /**
@@ -139,7 +139,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
 
     $form['auto_start'] = [
       '#title' => t('Enable tracking changes by default'),
-      '#description' => t('Set tracking on when the editor is loaded with this text format.'),
+      '#description' => t('Enable Lite tracking when the editor is loaded with this text format.'),
       '#type' => 'checkbox',
       '#default_value' => $config['auto_start'],
       '#attributes' => [
@@ -149,7 +149,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
 
     $form['auto_show'] = [
       '#title' => t('Enable show changes by default'),
-      '#description' => t('Set <em>show changes</em> on when the editor is loaded with this text format.<br>If the <em>show changes</em> button is not in the toolbar, users will not be able to disable the show changes.'),
+      '#description' => t('enable Lite <em>show changes</em> when the editor is loaded with this text format.<br>If the <em>show changes</em> button is not in the toolbar, users will not be able to disable the show changes.'),
       '#type' => 'checkbox',
       '#default_value' => $config['auto_show'],
       '#states' => [

@@ -15,7 +15,7 @@ use Drupal\ckeditor\CKEditorPluginInterface;
  *   module = "lite"
  * )
  */
- class DrupalLite extends PluginBase implements CKEditorPluginInterface {
+class DrupalLite extends PluginBase implements CKEditorPluginInterface {
 
   /**
    * Implements \Drupal\ckeditor\Plugin\CKEditorPluginInterface::getFile().

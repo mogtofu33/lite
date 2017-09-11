@@ -2,7 +2,6 @@
 
 namespace Drupal\lite\Form;
 
-use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandler;
 use Drupal\Core\Form\ConfigFormBase;
@@ -36,6 +35,8 @@ class LiteSettingsForm extends ConfigFormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
+   * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
+   *   The URL generator.
    * @param \Drupal\Core\Extension\ModuleHandler $module_handler
    *   The module handler.
    */
@@ -98,18 +99,17 @@ class LiteSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('tooltipTemplate'),
     ];
 
+    $params = [
+      ':url' => $this->urlGenerator->generateFromRoute('user.admin_permissions',
+      [],
+      ['fragment' => 'module-lite']),
+    ];
     $form['permissions_by_formats'] = [
-      '#title' => t('Enable permissions by text formats'),
-      '#description' => t('This option create the <em>toggle</em> and <em>resolve</em> <a href=":url">permissions</a> for each text format with the Lite filter enabled.', [':url' => $this->urlGenerator->generateFromRoute('user.admin_permissions', [], ['fragment' => 'module-lite'])]),
+      '#title' => $this->t('Enable permissions by text formats'),
+      '#description' => $this->t('This option create the <em>toggle</em> and <em>resolve</em> <a href=":url">permissions</a> for each text format with the Lite filter enabled.', $params),
       '#type' => 'checkbox',
       '#default_value' => $config->get('permissions_by_formats'),
     ];
-
-    // if ($this->moduleHandler->moduleExists('help')) {
-    //   $form['tooltipTemplate']['#description'] .= $this->t('Check out the <a href=":help">help</a> page for more information.<br />',
-    //     array(':help' => $this->urlGenerator->generateFromRoute('help.page', array('name' => 'lite')))
-    //   );
-    // }
 
     return parent::buildForm($form, $form_state);
   }
