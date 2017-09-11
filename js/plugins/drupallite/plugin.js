@@ -80,7 +80,8 @@
       // Remove toolbar buttons dynamically.
       editor.config.removeButtons = remove_buttons;
 
-      // Register these global permissions and settings.
+      // Register these global permissions and settings for use with a submodule
+      // currently lite_content_moderation.
       editor.config.drupallite.removedButtons = remove_buttons;
       editor.config.drupallite.permissions.can_toggle = can_toggle;
       editor.config.drupallite.permissions.can_resolve = can_resolve;
