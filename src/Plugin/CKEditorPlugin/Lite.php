@@ -315,7 +315,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
                   ':input[data-editor-lite-moderation="' . $worflow_id . '"]' => ['checked' => TRUE],
                 ],
               ],
-            ]
+            ];
             /*
             If (isset($config['moderation_options'][$worflow_id][$state_id]['auto_show'])) {
               $default = $config['moderation_options'][$worflow_id][$state_id]['auto_show'];
