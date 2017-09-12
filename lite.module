@@ -265,7 +265,7 @@ function lite_permissions_by_states($base_permissions) {
 
   // On 8.3.x moderation apply only on nodes.
   $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
-  foreach ($bundles as $bundle_name => $info) {
+  foreach ($bundles as $info) {
     if (isset($info['workflow'])) {
       $workflows[] = $info['workflow'];
     }
