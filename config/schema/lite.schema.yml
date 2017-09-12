@@ -7,6 +7,9 @@ lite.settings:
     tooltipTemplate:
       type: text
       label: 'Tracking tooltip template'
-    permissions_by_formats:
+    extra_permissions:
+      type: text
+      label: 'Add extra permissions'
+    debug:
       type: boolean
-      label: 'Permissions by formats'
+      label: 'Flag to print debug'

@@ -1,3 +1,4 @@
 tooltipTemplate: '%a by %u %t'
 langcode: en
-permissions_by_formats: 0
+extra_permissions: ''
+debug: false

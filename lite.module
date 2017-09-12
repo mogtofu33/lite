@@ -7,7 +7,29 @@
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\ContentEntityForm;
-use Drupal\user\Entity\Role;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function lite_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.lite':
+      $output = '';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<h4>' . t('Basic settings') . '</h4>';
+      $output .= '<p>' . t('From the text format settings.') . '</p>';
+      return $output;
+
+    break;
+
+    case 'lite.lite_settings_form':
+      return '<p>' . t('Attributes are HTML attributes that will be attached to the insert plugin.') . '</p>';
+
+    break;
+
+  }
+}
 
 /**
  * Implements hook_libraries_info().
@@ -37,6 +59,8 @@ function lite_libraries_info() {
 
 /**
  * Implements hook_element_info_alter().
+ *
+ * @see \Drupal\filter\Element\TextFormat
  */
 function lite_element_info_alter(array &$types) {
   // Our process callback must run immediately after
@@ -44,7 +68,6 @@ function lite_element_info_alter(array &$types) {
   if (isset($types['text_format']) && isset($types['text_format']['#process'])) {
     $search_value = ['Drupal\filter\Element\TextFormat', 'processFormat'];
     $key = array_search($search_value, $types['text_format']['#process']);
-
     if ($key !== FALSE) {
       $key++;
       array_splice($types['text_format']['#process'], $key, 0, 'lite_filter_process_format');
@@ -71,85 +94,108 @@ function lite_filter_process_format(&$element, FormStateInterface $form_state, &
   if ($form_object instanceof ContentEntityForm) {
 
     // Retrieve the entity related to the form.
-    $entity = $form_state->getFormObject()->getEntity();
-
-    // If the entity is new (being created) then check plugin option to disable
-    // tracking.
-    if ($entity->isNew()) {
-      $element['#pre_render'][] = 'lite_disable_tracking';
+    if (!$entity = $form_state->getFormObject()->getEntity()) {
+      return $element;
     }
+
+    $is_new = $entity->isNew();
+    // And pass it to the element as custom settings.
+    $element['#lite_node_values'] = [
+      'bundle' => $entity->bundle(),
+      'new' => $is_new,
+      'moderated' => FALSE,
+      'workflow' => FALSE,
+      'state' => NULL,
+    ];
+
+    // Ensure service can be loaded to avoid install errors.
+    if (\Drupal::moduleHandler()->moduleExists('content_moderation') && \Drupal::hasService('content_moderation.moderation_information')) {
+      /** @var \Drupal\content_moderation\ModerationInformationInterface $moderation_info */
+      $moderation_info = \Drupal::service('content_moderation.moderation_information');
+
+      // Add our values to help us for processing config and state.
+      $element['#lite_node_values']['moderated'] = $moderation_info->isModeratedEntity($entity);
+      if ($workflow = $moderation_info->getWorkflowForEntity($entity)) {
+        $element['#lite_node_values']['workflow'] = $workflow->id();
+      }
+      if (!$is_new) {
+        $element['#lite_node_values']['state'] = $entity->moderation_state->value;
+      }
+    }
+    // We can add our pre_render callback to disable tracking depending options.
+    $element['#pre_render'][] = 'lite_disable_tracking';
   }
 
   return $element;
 }
 
 /**
- * Pre-render function to disable text tracking on new entity creation.
+ * Pre-render function to disable text tracking depending text format settings.
  *
  * @see lite_filter_process_format()
  */
 function lite_disable_tracking($element) {
+
+  if (isset($element['#lite_node_values'])) {
+    // Recover our settings and pass it to the DrupalSettings js array for use
+    // in our plugin.
+    $node = $element['#lite_node_values'];
+    $is_new = $node['new'];
+    $element['#attached']['drupalSettings']['lite']['node'] = $node;
+    $config = \Drupal::config('lite.settings');
+    $debug = $config->get('debug');
+    $element['#attached']['drupalSettings']['lite']['debug'] = $debug;
+  }
+  else {
+    return $element;
+  }
+
   // Retrieve the available formats for the current text_format.
   $format_options = $element['format']['format']['#options'];
 
   // Loop through each of the available formats, adding a JS setting which
-  // disabled tracking for each.
+  // disabled tracking depeding format settings.
   foreach ($format_options as $format => $label) {
     if (isset($element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings'])) {
+      // Just simplify the array.
       $editor_settings = &$element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings'];
-      // If Do not start on new entity is checked.
-      if (isset($editor_settings['lite']['disable_new']) && $editor_settings['lite']['disable_new']) {
-        // Disable tracking passing variables directly to Lite plugin.
-        $editor_settings['lite']['isTracking'] = FALSE;
+      // If drupal lite is not enable we can stop here.
+      if (!isset($editor_settings['drupallite'])) {
+        continue;
+      }
+
+      // Check if the workflow is overriden from the text format settings.
+      $options = $editor_settings['drupallite']['options'];
+      if (!count($options)) {
+        continue;
+      }
+      if ($options['moderation'] == 0 || $node['moderated'] == FALSE || $options['moderation_options'][$node['workflow']]['enable'] == 0) {
+        // We are not dealing with a moderated or text format settings is
+        // disable. By default tracking is always enable, we check if we need to
+        // disable it when not enable by default or disabled on new entities.
+        if ($options['auto_start'] == 0 || ($is_new && $options['disable_new'] == 1)) {
+          $editor_settings['lite']['isTracking'] = FALSE;
+        }
+        continue;
+      }
+
+      // It's a new node without state, so check new entity setting.
+      if ($is_new) {
+        if ($options['disable_new'] == 1) {
+          $editor_settings['lite']['isTracking'] = FALSE;
+        }
+      }
+      // For an exisitng node, apply the setting for this Workflow state.
+      else {
+        $options = $options['moderation_options'][$node['workflow']][$node['state']];
+        if ($options['auto_start'] == 0) {
+          $editor_settings['lite']['isTracking'] = FALSE;
+        }
       }
     }
   }
 
   return $element;
-}
-
-/**
- * Return user permissions filtered to this module.
- *
- * @param null|Drupal\user\Entity\User $user
- *   Drupal User object or NULL to load current user.
- *
- * @return array
- *   List of lite permissions without spaces.
- */
-function lite_get_permissions($user = NULL) {
-  $permissions = $user_permissions = [];
-
-  if (!$user) {
-    $user = \Drupal::currentUser();
-  }
-
-  $roles = $user->getRoles();
-  // Specific Admin case, because Drupal return an empty array.
-  foreach ($roles as $role) {
-    $role = Role::load($role);
-    if ($role->isAdmin()) {
-      $user_permissions = array_keys(\Drupal::service('user.permissions')->getPermissions());
-    }
-  }
-
-  // For a regular user we load permissions.
-  if (!count($user_permissions)) {
-    $all_user_permissions = user_role_permissions($roles);
-    if (count($all_user_permissions)) {
-      $user_permissions = array_merge($all_user_permissions, $all_user_permissions);
-      $user_permissions = end($user_permissions);
-    }
-  }
-
-  // We filter permissions to get only lite related.
-  foreach ($user_permissions as $permission) {
-    if (strpos($permission, 'lite') !== FALSE) {
-      $permissions[] = str_replace(' ', '_', str_replace('lite ', '', $permission));
-    }
-  }
-
-  return $permissions;
 }
 
 /**
@@ -159,16 +205,35 @@ function lite_get_permissions($user = NULL) {
  */
 function lite_permissions() {
   $permissions = [];
-  $formats = [];
 
   // We can stop here if permission by formats is not enable.
   $config = \Drupal::config('lite.settings');
-  $permissions_by_formats = $config->get('permissions_by_formats');
-  if (!$permissions_by_formats) {
-    return $permissions;
+  $extra_permissions = $config->get('extra_permissions');
+
+  if (!empty($extra_permissions) && function_exists('lite_' . $extra_permissions)) {
+    $function_name = 'lite_' . $extra_permissions;
+    $base_permissions = [
+      'lite toggle' => [
+        'base_title' => '%target: May enable or disable tracking',
+      ],
+      'lite resolve' => [
+        'base_title' => '%target: May resolve changes',
+      ],
+    ];
+    return $function_name($base_permissions);
   }
 
-  // Build a list of formats with lite enabled.
+  return $permissions;
+}
+
+/**
+ * Create permissions for each format with Lite enable.
+ */
+function lite_permissions_by_formats($base_permissions) {
+  $permissions = [];
+  $formats = [];
+
+  // Build a list of formats with lite enable.
   $filter_formats = filter_formats();
   foreach ($filter_formats as $filter_format) {
     $filters = $filter_format->get('filters');
@@ -178,20 +243,49 @@ function lite_permissions() {
   }
 
   // Create permissions for each text format.
-  $tracking_permissions = [
-    'lite toggle' => [
-      'base_title' => '%format: May enable or disable tracking',
-    ],
-    'lite resolve' => [
-      'base_title' => '%format: May resolve changes',
-    ],
-  ];
   foreach ($formats as $id => $format_name) {
-    foreach ($tracking_permissions as $tracking_permission => $tracking_info) {
-      $permissions[$tracking_permission . ' ' . $id] = [
-        'title' => t($tracking_info['base_title'], ['%format' => $format_name]),
-        'description' => t('Ensure user can use this format to be able to ensure this permission.'),
+    foreach ($base_permissions as $base_permission => $tracking_info) {
+      $permissions[$base_permission . ' ' . $id] = [
+        'title' => t($tracking_info['base_title'], ['%target' => $format_name]),
+        'description' => t('Ensure user can use this <em>format</em> to be able to use this permission.'),
       ];
+    }
+  }
+
+  return $permissions;
+}
+
+/**
+ * Permission callback for Lite's lite_content_moderation.permissions.yml.
+ *
+ * @see lite_content_moderation.permissions.yml
+ */
+function lite_permissions_by_states($base_permissions) {
+  $permissions = $workflows = [];
+
+  // On 8.3.x moderation apply only on nodes.
+  $bundles = \Drupal::service('entity_type.bundle.info')->getBundleInfo('node');
+  foreach ($bundles as $bundle_name => $info) {
+    if (isset($info['workflow'])) {
+      $workflows[] = $info['workflow'];
+    }
+  }
+
+  foreach ($workflows as $workflow_id) {
+    // We are not sure workflow module is enable, so we use statements to use
+    // Workflow class.
+    // @codingStandardsIgnoreStart
+    if ($workflow = \Drupal\workflows\Entity\Workflow::load($workflow_id)) {
+      // @codingStandardsIgnoreEnd
+      $states = $workflow->getStates();
+      foreach ($base_permissions as $base_permission => $tracking_info) {
+        foreach ($states as $state) {
+          $permissions[$base_permission . ' ' . $workflow_id . ' ' . $state->id()] = [
+            'title' => t($tracking_info['base_title'], ['%target' => $workflow->label() . ', ' . $state->label()]),
+            'description' => t('Ensure user can use this <em>state</em> to be able to use this permission.'),
+          ];
+        }
+      }
     }
   }
 

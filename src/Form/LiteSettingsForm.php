@@ -78,6 +78,26 @@ class LiteSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('lite.settings');
 
+    $options = [
+      '' => $this->t('- Select -'),
+      'permissions_by_formats' => $this->t('Add permissions by text formats'),
+    ];
+    if ($this->moduleHandler->moduleExists('content_moderation')) {
+      $options['permissions_by_states'] = $this->t('Add permissions by Workflow states');
+    }
+    $params = [
+      ':url' => $this->urlGenerator->generateFromRoute('user.admin_permissions',
+      [],
+      ['fragment' => 'module-lite']),
+    ];
+    $form['extra_permissions'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Add more permissions'),
+      '#description' => $this->t('Before changing or removing extra permission here, be sure to uncheck existing permissions on the <a href=":url">permissions</a>  administration.', $params),
+      '#options' => $options,
+      '#default_value' => $config->get('extra_permissions'),
+    ];
+
     $form['tooltipTemplate'] = [
       '#title' => $this->t('Tooltip template'),
       '#type' => 'textarea',
@@ -99,16 +119,11 @@ class LiteSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('tooltipTemplate'),
     ];
 
-    $params = [
-      ':url' => $this->urlGenerator->generateFromRoute('user.admin_permissions',
-      [],
-      ['fragment' => 'module-lite']),
-    ];
-    $form['permissions_by_formats'] = [
-      '#title' => $this->t('Enable permissions by text formats'),
-      '#description' => $this->t('This option create the <em>toggle</em> and <em>resolve</em> <a href=":url">permissions</a> for each text format with the Lite filter enabled.', $params),
+    $form['debug'] = [
+      '#title' => $this->t('Enable debug'),
+      '#description' => $this->t('Display information on the javascript console of the browser when using the Wysiwyg with Lite to ease configuration.'),
       '#type' => 'checkbox',
-      '#default_value' => $config->get('permissions_by_formats'),
+      '#default_value' => $config->get('debug'),
     ];
 
     return parent::buildForm($form, $form_state);
@@ -122,7 +137,8 @@ class LiteSettingsForm extends ConfigFormBase {
 
     $this->config('lite.settings')
       ->set('tooltipTemplate', $form_state->getValue('tooltipTemplate'))
-      ->set('permissions_by_formats', $form_state->getValue('permissions_by_formats'))
+      ->set('extra_permissions', $form_state->getValue('extra_permissions'))
+      ->set('debug', $form_state->getValue('debug'))
       ->save();
   }
 

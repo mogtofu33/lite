@@ -6,6 +6,17 @@ use Drupal\editor\Entity\Editor;
 use Drupal\ckeditor\CKEditorPluginBase;
 use Drupal\ckeditor\CKEditorPluginConfigurableInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\Role;
+use Drupal\workflows\WorkflowInterface;
+use Drupal\workflows\Entity\Workflow;
+use Drupal\content_moderation\Plugin\WorkflowType\ContentModeration;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\user\PermissionHandler;
+use Drupal\Core\Extension\ModuleHandler;
+use Drupal\Core\Routing\UrlGeneratorInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines the "lite" plugin.
@@ -16,7 +27,100 @@ use Drupal\Core\Form\FormStateInterface;
  *   module = "lite"
  * )
  */
-class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInterface {
+class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInterface, ContainerFactoryPluginInterface {
+
+  /**
+   * The current user account service.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
+   * The permission handler service.
+   *
+   * @var \Drupal\user\PermissionHandler
+   */
+  protected $permissionsHandler;
+
+  /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandler
+   */
+  protected $moduleHandler;
+
+  /**
+   * The url generator service.
+   *
+   * @var \Drupal\Core\Routing\UrlGeneratorInterface
+   */
+  protected $urlGenerator;
+
+  /**
+   * The entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * Constructs a \Drupal\ckeditor\Plugin\CKEditorPlugin\DrupalLite object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The current user.
+   * @param \Drupal\user\PermissionHandler $permissions_handler
+   *   The permissions handler service.
+   * @param \Drupal\Core\Extension\ModuleHandler $module_handler
+   *   The module handler.
+   * @param \Drupal\Core\Routing\UrlGeneratorInterface $url_generator
+   *   The URL generator.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
+   *   The entity manager service.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, AccountInterface $current_user, PermissionHandler $permissions_handler, ModuleHandler $module_handler, UrlGeneratorInterface $url_generator, EntityTypeManagerInterface $entity_manager) {
+    $this->currentUser = $current_user;
+    $this->permissionsHandler = $permissions_handler;
+    $this->moduleHandler = $module_handler;
+    $this->urlGenerator = $url_generator;
+    $this->entityTypeManager = $entity_manager;
+
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * Creates an instance of the plugin.
+   *
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   The container to pull out services used in the plugin.
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin ID for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   *
+   * @return static
+   *   Returns an instance of this plugin.
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('current_user'),
+      $container->get('user.permissions'),
+      $container->get('module_handler'),
+      $container->get('url_generator'),
+      $container->get('entity_type.manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -39,50 +143,23 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
   /**
    * {@inheritdoc}
    */
-  public function getLibraries(Editor $editor) {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getConfig(Editor $editor) {
-    $config = [];
-    $user = \Drupal::currentUser();
-    $settings = $editor->getSettings();
     $lite_settings = \Drupal::config('lite.settings');
-    $tooltipTemplate = $lite_settings->get('tooltipTemplate');
+    $settings = $editor->getSettings();
 
+    // Lite settings, see http://www.loopindex.com/lite/docs/
     $config['lite'] = [
-      'userId' => $user->id(),
-      'userName' => $user->getDisplayName(),
-      'tooltipTemplate' => $tooltipTemplate,
-      'auto_start' => 1,
-      'auto_show' => 1,
-      'disable_new' => 1,
+      'userId' => $this->currentUser->id(),
+      'userName' => $this->currentUser->getDisplayName(),
+      'tooltipTemplate' => $lite_settings->get('tooltipTemplate'),
+      // 'tooltips' => FALSE,.
     ];
 
-    if (!empty($settings['plugins']['lite']['auto_start'])) {
-      $config['lite']['auto_start'] = $settings['plugins']['lite']['auto_start'];
-    }
-    else {
-      // Force disable.
-      $config['lite']['auto_start'] = 0;
-    }
-    if (!empty($settings['plugins']['lite']['auto_show'])) {
-      $config['lite']['auto_show'] = $settings['plugins']['lite']['auto_show'];
-    }
-    else {
-      // Force disable.
-      $config['lite']['auto_show'] = 0;
-    }
-    if (!empty($settings['plugins']['lite']['disable_new'])) {
-      $config['lite']['disable_new'] = $settings['plugins']['lite']['disable_new'];
-    }
-    else {
-      // Force disable.
-      $config['lite']['disable_new'] = 0;
-    }
+    // Custom settings for this plugin.
+    $config['drupallite'] = [
+      'permissions' => $this->getUserPermissions(),
+      'options' => isset($settings['plugins']['drupallite']) ? $settings['plugins']['drupallite'] : [],
+    ];
 
     return $config;
   }
@@ -125,37 +202,28 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state, Editor $editor) {
-    // Defaults.
-    $config = [
-      'auto_start' => 1,
-      'auto_show' => 1,
-      'disable_new' => 1,
-    ];
     $settings = $editor->getSettings();
 
-    if (isset($settings['plugins']['lite'])) {
-      $config = $settings['plugins']['lite'];
+    if (isset($settings['plugins']['drupallite'])) {
+      $config = $settings['plugins']['drupallite'];
+    }
+
+    if ($this->moduleHandler->moduleExists('help')) {
+      $params = [
+        ':help' => $this->urlGenerator->generateFromRoute('help.page', ['name' => 'lite']),
+      ];
+      $form['help'] = [
+        '#markup' => $this->t('<br>See the <a href=":help">help</a> for more information on these options.', $params),
+      ];
     }
 
     $form['auto_start'] = [
       '#title' => t('Enable tracking changes by default'),
       '#description' => t('Enable Lite tracking when the editor is loaded with this text format.'),
       '#type' => 'checkbox',
-      '#default_value' => $config['auto_start'],
+      '#default_value' => isset($config['auto_start']) ? $config['auto_start'] : 1,
       '#attributes' => [
         'data-editor-lite' => 'auto_start',
-      ],
-    ];
-
-    $form['auto_show'] = [
-      '#title' => t('Enable show changes by default'),
-      '#description' => t('enable Lite <em>show changes</em> when the editor is loaded with this text format.<br>If the <em>show changes</em> button is not in the toolbar, users will not be able to disable the show changes.'),
-      '#type' => 'checkbox',
-      '#default_value' => $config['auto_show'],
-      '#states' => [
-        'visible' => [
-          ':input[data-editor-lite="auto_start"]' => ['checked' => TRUE],
-        ],
       ],
     ];
 
@@ -163,15 +231,158 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
       '#title' => t('Do not start tracking on <em>New</em> entity'),
       '#description' => t('Prevent users from becoming confused if their initial content does not show up after saving the entity without accepting any change.'),
       '#type' => 'checkbox',
-      '#default_value' => $config['disable_new'],
+      '#default_value' => isset($config['disable_new']) ? $config['disable_new'] : 0,
+    ];
+
+    /*
+    $form['auto_show'] = [
+      '#title' => t('Enable show changes by default'),
+      '#description' => t('Enable Lite <em>show changes</em> when the editor is loaded with this text format.<br>If the <em>show changes</em> button is not in the toolbar, users will not be able to disable the show changes.'),
+      '#type' => 'checkbox',
+      '#default_value' => isset($config['auto_show']) ? $config['auto_show'] : 0,
       '#states' => [
         'visible' => [
           ':input[data-editor-lite="auto_start"]' => ['checked' => TRUE],
         ],
       ],
     ];
+    */
+
+    if ($this->moduleHandler->moduleExists('content_moderation')) {
+      $params = [
+        ':url' => $this->urlGenerator->generateFromRoute('entity.workflow.collection'),
+        ':url_lite' => $this->urlGenerator->generateFromRoute('lite.lite_settings_form'),
+      ];
+      $form['moderation'] = [
+        '#title' => t('Enable content moderation support'),
+        '#description' => $this->t('Extend Lite options by <a href=":url">Workflows</a> states for this text format. Could be used with <a href=":url_lite">permissions by states</a> enable.', $params),
+        '#type' => 'checkbox',
+        '#default_value' => isset($config['moderation']) ? $config['moderation'] : 0,
+        '#attributes' => [
+          'data-editor-lite-moderation' => 'enable',
+        ],
+      ];
+      $form['moderation_options'] = [
+        '#type' => 'container',
+        '#states' => [
+          'visible' => [
+            ':input[data-editor-lite-moderation="enable"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
+
+      /* @var \Drupal\workflows\WorkflowInterface[] $workflows */
+      $workflows = $this->entityTypeManager->getStorage('workflow')->loadMultiple();
+      $options = array_map(function (WorkflowInterface $workflow) {
+        return $workflow->label();
+      }, array_filter($workflows, function (WorkflowInterface $workflow) {
+        return $workflow->status() && $workflow->getTypePlugin() instanceof ContentModeration;
+      }));
+
+      if (count($options)) {
+        foreach ($options as $worflow_id => $label) {
+
+          $form['moderation_options'][$worflow_id] = [
+            '#title' => t(':label', [':label' => $label]),
+            '#type' => 'details',
+          ];
+
+          $form['moderation_options'][$worflow_id]['enable'] = [
+            '#title' => t('Override options for this Workflow'),
+            '#type' => 'checkbox',
+            '#default_value' => isset($config['moderation_options'][$worflow_id]['enable']) ? $config['moderation_options'][$worflow_id]['enable'] : 0,
+            '#attributes' => [
+              'data-editor-lite-moderation' => $worflow_id,
+            ],
+          ];
+
+          $workflow = Workflow::load($worflow_id);
+          $states = $workflow->getStates();
+          foreach ($states as $state) {
+            $state_id = $state->id();
+            if (isset($config['moderation_options'][$worflow_id][$state_id]['auto_start'])) {
+              $default = $config['moderation_options'][$worflow_id][$state_id]['auto_start'];
+            }
+            else {
+              $default = 0;
+            }
+            $form['moderation_options'][$worflow_id][$state_id]['auto_start'] = [
+              '#title' => t('%state: enable tracking changes by default', ['%state' => $state->label()]),
+              '#type' => 'checkbox',
+              '#default_value' => $default,
+              '#states' => [
+                'visible' => [
+                  ':input[data-editor-lite-moderation="' . $worflow_id . '"]' => ['checked' => TRUE],
+                ],
+              ],
+            ]
+            /*
+            If (isset($config['moderation_options'][$worflow_id][$state_id]['auto_show'])) {
+              $default = $config['moderation_options'][$worflow_id][$state_id]['auto_show'];
+            }
+            else {
+              $default = 0;
+            }
+            $form['moderation_options'][$worflow_id][$state_id]['auto_show'] = [
+              '#title' => t('%state: enable show changes by default', ['%state' => $state->label()]),
+              '#type' => 'checkbox',
+              '#default_value' => $default,
+              '#states' => [
+                'visible' => [
+                  ':input[data-editor-lite-moderation="' . $worflow_id . '"]' => ['checked' => TRUE],
+                ],
+              ],
+            ];
+            */
+          }
+          // Open or close if we have this workflow enabled.
+          if (isset($config['moderation_options'][$worflow_id]['enable']) && $config['moderation_options'][$worflow_id]['enable'] == 1) {
+            $form['moderation_options'][$worflow_id]['#open'] = TRUE;
+          }
+        }
+      }
+    }
 
     return $form;
+  }
+
+  /**
+   * Return user permissions filtered to this module.
+   *
+   * @return array
+   *   List of lite permissions without spaces.
+   */
+  private function getUserPermissions() {
+    $permissions = $user_permissions = [];
+
+    $roles = $this->currentUser->getRoles();
+
+    // Specific Admin case, because Drupal return an empty array we need all
+    // permissions if one of the role is admin.
+    foreach ($roles as $role) {
+      $role = Role::load($role);
+      if ($role->isAdmin()) {
+        $user_permissions = array_keys($this->permissionsHandler->getPermissions());
+        continue;
+      }
+    }
+
+    // For a regular user we load permissions.
+    if (!count($user_permissions)) {
+      $all_user_permissions = user_role_permissions($roles);
+      if (count($all_user_permissions)) {
+        $user_permissions = array_merge($all_user_permissions, $all_user_permissions);
+        $user_permissions = end($user_permissions);
+      }
+    }
+
+    // We filter permissions to get only lite related to be used by our plugin.
+    foreach ($user_permissions as $permission) {
+      if (strpos($permission, 'lite') !== FALSE) {
+        $permissions[] = str_replace(['lite ', ' '], ['', '_'], $permission);
+      }
+    }
+    return $permissions;
   }
 
 }

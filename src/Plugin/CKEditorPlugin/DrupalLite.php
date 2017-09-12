@@ -2,23 +2,23 @@
 
 namespace Drupal\lite\Plugin\CKEditorPlugin;
 
-use Drupal\Core\Plugin\PluginBase;
 use Drupal\editor\Entity\Editor;
-use Drupal\ckeditor\CKEditorPluginInterface;
+use Drupal\ckeditor\CKEditorPluginBase;
+use Drupal\ckeditor\CKEditorPluginContextualInterface;
 
 /**
  * Defines the "Drupal lite" plugin.
  *
  * @CKEditorPlugin(
  *   id = "drupallite",
- *   label = @Translation("Drupal lite extension plugin."),
+ *   label = @Translation("Lite"),
  *   module = "lite"
  * )
  */
-class DrupalLite extends PluginBase implements CKEditorPluginInterface {
+class DrupalLite extends CKEditorPluginBase implements CKEditorPluginContextualInterface {
 
   /**
-   * Implements \Drupal\ckeditor\Plugin\CKEditorPluginInterface::getFile().
+   * {@inheritdoc}
    */
   public function getFile() {
     return drupal_get_path('module', 'lite') . '/js/plugins/drupallite/plugin.js';
@@ -27,36 +27,42 @@ class DrupalLite extends PluginBase implements CKEditorPluginInterface {
   /**
    * {@inheritdoc}
    */
-  public function getDependencies(Editor $editor) {
+  public function getButtons() {
+    // Buttons are managed by lite.
     return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLibraries(Editor $editor) {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isInternal() {
-    return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getConfig(Editor $editor) {
-    $config = [];
+    // Config is managed by lite.
+    return [];
+  }
 
-    // Load current user permissions.
-    $config['drupallite'] = [
-      'permissions' => lite_get_permissions(),
-    ];
+  /**
+   * {@inheritdoc}
+   */
+  public function isEnabled(Editor $editor) {
+    if (!$editor->hasAssociatedFilterFormat()) {
+      return FALSE;
+    }
 
-    return $config;
+    // Automatically enable this plugin if the text format associated with this
+    // text editor uses any lite button.
+    $enabled = FALSE;
+    $settings = $editor->getSettings();
+
+    foreach ($settings['toolbar']['rows'] as $row) {
+      foreach ($row as $group) {
+        foreach ($group['items'] as $button) {
+          if (strpos('lite-', $button) !== FALSE) {
+            $enabled = TRUE;
+          }
+        }
+      }
+    }
+    return $enabled;
   }
 
 }

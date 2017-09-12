@@ -12,8 +12,8 @@ use Drupal\Component\Utility\Html;
  *
  * @Filter(
  *   id = "lite",
- *   title = @Translation("Hide Lite changes tracking"),
- *   description = @Translation("Hide &lt;ins&gt; and &lt;del&gt; markup from Lite tracking changes."),
+ *   title = @Translation("Lite changes tracking"),
+ *   description = @Translation("Hide &lt;ins&gt; and &lt;del&gt; markup from Lite tracking changes in the view mode of the content."),
  *   type = Drupal\filter\Plugin\FilterInterface::TYPE_TRANSFORM_REVERSIBLE,
  *   settings = {
  *     "clean" = 0,
