@@ -101,7 +101,7 @@ class LiteSettingsForm extends ConfigFormBase {
     $form['tooltipTemplate'] = [
       '#title' => $this->t('Tooltip template'),
       '#type' => 'textarea',
-      '#description' => $this->t('Allow a custom template to use with Opentip library used by Lite plugin.<br>Available variables:<br><small>
+      '#description' => $this->t('Allow a custom template to use with Lite plugin, allow some HTML tags.<br>Available variables:<br><small>
       <strong>%a</strong>  The action, "added" or "deleted"<br>
       <strong>%t</strong>  Timestamp of the first edit action in this change span (e.g. "now", "3 minutes ago", "August 15 1972")<br>
       <strong>%u</strong>  the name of the user who made the change<br>
