@@ -180,6 +180,7 @@ function lite_disable_tracking($element) {
   // Loop through each of the available formats, adding a JS setting which
   // disabled tracking depeding format settings.
   foreach ($format_options as $format => $label) {
+    $tracking = TRUE;
     if (isset($element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings'])) {
       // Just simplify the array.
       $editor_settings = &$element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings'];
@@ -200,7 +201,7 @@ function lite_disable_tracking($element) {
           // to disable it when not enable by default or disabled on new
           // entities.
           if ($options['auto_start'] == 0 || ($is_new && $options['disable_new'] == 1)) {
-            $editor_settings['lite']['isTracking'] = FALSE;
+            $tracking = FALSE;
           }
           continue;
         }
@@ -209,16 +210,17 @@ function lite_disable_tracking($element) {
       // It's a new node without state, so check new entity setting.
       if ($is_new) {
         if ($options['disable_new'] == 1) {
-          $editor_settings['lite']['isTracking'] = FALSE;
+          $tracking = FALSE;
         }
       }
       // For an exisitng node, apply the setting for this Workflow state.
-      else {
+      elseif (isset($options['moderation_options'][$node['workflow']][$node['state']])) {
         $options = $options['moderation_options'][$node['workflow']][$node['state']];
         if ($options['auto_start'] == 0) {
-          $editor_settings['lite']['isTracking'] = FALSE;
+          $tracking = FALSE;
         }
       }
+      $editor_settings['lite']['isTracking'] = $tracking;
     }
   }
 
