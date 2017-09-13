@@ -11,135 +11,103 @@
 
   'use strict';
 
+  var $use_cases = ['toggle', 'resolve'];
+  var $user_can = {'toggle': false, 'resolve': false};
+
   CKEDITOR.plugins.add('drupallite', {
-
-    // We evaluate the auto show option.
-    /*
-    init: function (editor) {
-
-      var config = editor.config.drupallite,
-          format = editor.config.drupal.format,
-          key = '';
-
-      // Alter lite when init event is triggered.
-      editor.on('lite:init', function (event) {
-
-        // Lite plugin instance.
-        var lite = event.data.lite;
-        // Handle auto show setting.
-        if (!editor.config.lite.auto_show) {
-          @see https://github.com/loopindex/ckeditor-track-changes#api
-          lite.toggleShow(false, true);
-        }
-      });
-    },
-    */
 
     // We are checking after init to be able to remove contextual menu items.
     afterInit: function (editor) {
 
-      var config = editor.config.drupallite.options,
-          permissions = editor.config.drupallite.permissions,
+      var config = editor.config.lite.options,
+          permissions = editor.config.lite.permissions,
+          extra_permissions = editor.config.lite.extra_permissions,
           format = null,
-          moderated = editor.config.drupallite.options.moderation,
+          // moderated = editor.config.lite.options.moderation,
           node = null,
           key = '',
           remove_buttons = '',
-          can_toggle = false,
-          can_resolve = false,
           debug = false;
 
       if (editor.config.hasOwnProperty('drupal')) {
         format = editor.config.drupal.format;
       }
+
+      // Main Lite settings from configuration or pre_render on element.
       if (drupalSettings.hasOwnProperty('lite')) {
         if (drupalSettings.lite.hasOwnProperty('node')) {
           node = drupalSettings.lite.node;
         }
-        if (drupalSettings.lite.hasOwnProperty('node')) {
+        if (drupalSettings.lite.hasOwnProperty('debug')) {
           debug = drupalSettings.lite.debug;
         }
+        debug && console.log(drupalSettings.lite);
       }
 
-      debug && console.log('User permissions: ' + permissions);
+      debug && console.log(editor.config.lite);
 
-      // User can not toggle tracking based on main permission.
-      if (permissions.indexOf("toggle") !== -1) {
-        debug && console.log('User HAS main TOOGLE permission');
-        can_toggle = true;
-      }
-      else {
-        debug && console.log('User DO NOT have main TOOGLE permission');
-      }
-
-      // User can not accept or reject changes.
-      if (permissions.indexOf("resolve") !== -1) {
-        debug && console.log('User HAS main RESOLVE permission');
-        can_resolve = true;
-      }
-      else {
-        debug && console.log('User DO NOT have main RESOLVE permission');
-      }
+      // Main permission check.
+      checkPermission(key, permissions, $user_can, debug);
 
       // Text format permission.
-      if (format) {
+      if (format && extra_permissions == 'permissions_by_formats') {
+        debug && console.log('Check extra permissions for text format: ' + format);
         key = '_' + format;
-
-        if (!can_toggle && permissions.indexOf("toggle" + key) !== -1) {
-          debug && console.log('User HAS format TOOGLE permission');
-          can_toggle = true;
-        }
-        else {
-          debug && console.log('User DO NOT have format TOOGLE permission');
-        }
-        if (!can_resolve && permissions.indexOf("resolve" + key) !== -1) {
-          debug && console.log('User HAS format RESOLVE permission');
-          can_resolve = true;
-        }
-        else {
-          debug && console.log('User DO NOT have format RESOLVE permission');
-        }
+        checkPermission(key, permissions, $user_can, debug);
       }
-
       // Moderation permission.
-      if (node) {
+      else if (node && extra_permissions == 'permissions_by_states') {
         if (node.moderated) {
           key = '_' + node.workflow + '_' + node.state;
-          var label = node.workflow + ': ' + node.state;
-
-          if (!can_toggle && permissions.indexOf("toggle" + key) !== -1) {
-            debug && console.log('User HAS moderation ' + label + ' TOOGLE permission');
-            can_toggle = true;
-          }
-          else {
-            debug && console.log('User DO NOT have moderation ' + label + ' TOOGLE permission');
-          }
-          if (!can_resolve && permissions.indexOf("resolve" + key) !== -1) {
-            debug && console.log('User HAS moderation ' + label + ' RESOLVE permission');
-            can_resolve = true;
-          }
-          else {
-            debug && console.log('User DO NOT have moderation ' + label + ' RESOLVE permission');
-          }
+          checkPermission(key, permissions, $user_can, debug);
         }
       }
 
       // Add toggle button to be removed.
-      if (!can_toggle) {
+      if (!$user_can.toggle) {
         remove_buttons += 'lite-toggletracking,';
       }
+
       // Add accept and reject buttons to be removed.
-      if (!can_resolve) {
+      if (!$user_can.resolve) {
         remove_buttons += 'lite-acceptall,lite-rejectall,lite-acceptone,lite-rejectone';
+
         // Disable contextual menu options.
+        // https://docs.ckeditor.com/#!/api/CKEDITOR.editor-method-removeMenuItem
         editor.removeMenuItem('lite-acceptone');
         editor.removeMenuItem('lite-rejectone');
       }
-      // Remove toolbar buttons dynamically on the editor config.
-      editor.config.removeButtons = remove_buttons;
 
+      // Remove toolbar buttons dynamically on the editor config.
+      // https://docs.ckeditor.com/#!/api/CKEDITOR.config-cfg-removeButtons
+      editor.config.removeButtons = remove_buttons;
     }
 
   });
+
+  /**
+   * Simple user permission check for the action key.
+   *
+   * @param string key
+   *   The key to check.
+   * @param array permissions
+   *   The user permissions.
+   * @param object $user_can
+   *   The current user capability.
+   * @param bool debug
+   *   Flag to print log message in the console..
+   *
+   */
+  function checkPermission(key, permissions, $user_can, debug) {
+    $use_cases.forEach(function(use_case) {
+      if (!$user_can[use_case] && permissions.indexOf(use_case + key) !== -1) {
+        debug && console.log(use_case + ' ' + key + ': GRANTED');
+        $user_can[use_case] = true;
+      }
+      else {
+        debug && console.log(use_case + ' ' + key + ': REFUSED');
+      }
+    });
+  }
 
 })(jQuery, Drupal, drupalSettings, CKEDITOR);
