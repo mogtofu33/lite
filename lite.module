@@ -27,6 +27,7 @@ function lite_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h4>' . t('Basic usage') . '</h4>';
       $output .= '<p>';
       $output .= t('From the text format settings you can enable <em>tracking by default</em> on Lite options. If the role do not have the permission provided by this module to toggle tracking, it will be forced.');
+      $output .= '<br>' . t('Users still can avoid tracking even when forced if they got access to the source button or a text format without Lite enable.');
       $output .= '<br>' . t('This module permissions can restrict accept / reject changes to specific roles.') . '</p>';
       $output .= '<h4>' . t('Advanced settings') . '</h4>';
       $output .= '<p>' . t('You can enable <a href=":url">extra permissions</a> by text formats to get a more fine grain permissions. Note that main permissions always override permissions by formats.', [':url' => $url->generate('lite.lite_settings_form')]) . '</p>';
