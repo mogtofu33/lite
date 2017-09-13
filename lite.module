@@ -15,16 +15,37 @@ use Drupal\Core\Routing\RouteMatchInterface;
 function lite_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.lite':
+      $url = Drupal::urlGenerator();
       $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Lite integrates the <a href=":url">LITE track changes</a> plugin for CKEditor with Drupal.', [':url' => 'https://ckeditor.com/addon/lite']);
       $output .= '<h3>' . t('Uses') . '</h3>';
-      $output .= '<h4>' . t('Basic settings') . '</h4>';
-      $output .= '<p>' . t('From the text format settings.') . '</p>';
+      $output .= '<p>';
+      $output .= t('You should create a specific text format and probably a content type and roles for easiest configuration of Lite.');
+      $output .= '<br>' . t('Module <a href=":url">allowed formats</a> can help you force tracking on a content type.', [':url' => 'https://www.drupal.org/project/allowed_formats']);
+      $output .= '</p>';
+      $output .= '<h4>' . t('Basic usage') . '</h4>';
+      $output .= '<p>';
+      $output .= t('From the text format settings you can enable <em>tracking by default</em> on Lite options. If the role do not have the permission provided by this module to toggle tracking, it will be forced.');
+      $output .= '<br>' . t('This module permissions can restrict accept / reject changes to specific roles.') . '</p>';
+      $output .= '<h4>' . t('Advanced settings') . '</h4>';
+      $output .= '<p>' . t('You can enable <a href=":url">extra permissions</a> by text formats to get a more fine grain permissions. Note that main permissions always override permissions by formats.', [':url' => $url->generate('lite.lite_settings_form')]) . '</p>';
+      $output .= '<h4>' . t('Content moderation support') . '</h4>';
+      $output .= '<p>';
+      $output .= t('If the Drupal <a href=":url">Content Moderation</a> module is enabled, Lite text format option by Workflow and by states will be available.', [':url' => 'https://www.drupal.org/docs/8/core/modules/content-moderation']);
+      $output .= '<br>' . t('Prior to text format configuration you must enable a Workflow on your content type and set the Workflow transitions permissions to your roles accordingly.');
+      $output .= '</p>';
+      $output .= '<p>';
+      $output .= t('The Lite text format settings will allow a fine grain configuration of the <em>Auto tracking</em> by Workflow and by States.');
+      $output .= '<br>' . t('You must ensure related roles got permission to access enabled content moderation states.');
+      $output .= '</p>';
+      $output .= '<p>' . t('With Content Moderation module enable, you can enable <a href=":url">extra permissions</a> by states to get a more fine grain permissions.', [':url' => $url->generate('lite.lite_settings_form')]) . '</p>';
+      $output .= '<h5>' . t('Content moderation issues') . '</h5>';
+      $output .= '<p>';
+      $output .= t('If a role is not granted toggle or resolve permissions for a moderation state but has permission to move to the next transition, nothing will prevent the user for saving. You should check carrefully you settings and permissions.');
+      $output .= t('A debug option on Lite settings can help you check your configuration.');
+      $output .= '</p>';
       return $output;
-
-    break;
-
-    case 'lite.lite_settings_form':
-      return '<p>' . t('Attributes are HTML attributes that will be attached to the insert plugin.') . '</p>';
 
     break;
 
@@ -132,6 +153,9 @@ function lite_filter_process_format(&$element, FormStateInterface $form_state, &
 /**
  * Pre-render function to disable text tracking depending text format settings.
  *
+ * We use Lite configuration to start or disable tracking, see
+ * http://www.loopindex.com/lite/docs/
+ *
  * @see lite_filter_process_format()
  */
 function lite_disable_tracking($element) {
@@ -160,23 +184,25 @@ function lite_disable_tracking($element) {
       // Just simplify the array.
       $editor_settings = &$element['#attached']['drupalSettings']['editor']['formats'][$format]['editorSettings'];
       // If drupal lite is not enable we can stop here.
-      if (!isset($editor_settings['drupallite'])) {
+      if (!isset($editor_settings['lite'])) {
         continue;
       }
 
       // Check if the workflow is overriden from the text format settings.
-      $options = $editor_settings['drupallite']['options'];
+      $options = $editor_settings['lite']['options'];
       if (!count($options)) {
         continue;
       }
-      if ($options['moderation'] == 0 || $node['moderated'] == FALSE || $options['moderation_options'][$node['workflow']]['enable'] == 0) {
-        // We are not dealing with a moderated or text format settings is
-        // disable. By default tracking is always enable, we check if we need to
-        // disable it when not enable by default or disabled on new entities.
-        if ($options['auto_start'] == 0 || ($is_new && $options['disable_new'] == 1)) {
-          $editor_settings['lite']['isTracking'] = FALSE;
+      if (isset($options['moderation'])) {
+        if ($options['moderation'] == 0 || $node['moderated'] == FALSE || $options['moderation_options'][$node['workflow']]['enable'] == 0) {
+          // We are not dealing with a moderated or text format settings is
+          // disable. By default tracking is always enable, we check if we need to
+          // disable it when not enable by default or disabled on new entities.
+          if ($options['auto_start'] == 0 || ($is_new && $options['disable_new'] == 1)) {
+            $editor_settings['lite']['isTracking'] = FALSE;
+          }
+          continue;
         }
-        continue;
       }
 
       // It's a new node without state, so check new entity setting.

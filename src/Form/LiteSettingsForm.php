@@ -93,7 +93,7 @@ class LiteSettingsForm extends ConfigFormBase {
     $form['extra_permissions'] = [
       '#type' => 'select',
       '#title' => $this->t('Add more permissions'),
-      '#description' => $this->t('Before changing or removing extra permission here, be sure to uncheck existing permissions on the <a href=":url">permissions</a>  administration.', $params),
+      '#description' => $this->t('Before changing or removing extra permission here, be sure to uncheck existing permissions on the <a href=":url">permissions</a>  administration.<br>This option bring more complexity to the configuration of this module.', $params),
       '#options' => $options,
       '#default_value' => $config->get('extra_permissions'),
     ];

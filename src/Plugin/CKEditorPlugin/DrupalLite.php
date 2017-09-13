@@ -11,7 +11,7 @@ use Drupal\ckeditor\CKEditorPluginContextualInterface;
  *
  * @CKEditorPlugin(
  *   id = "drupallite",
- *   label = @Translation("Lite"),
+ *   label = @Translation("Lite extended plugin for Drupal"),
  *   module = "lite"
  * )
  */

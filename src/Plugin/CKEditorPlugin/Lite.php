@@ -147,18 +147,16 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
     $lite_settings = \Drupal::config('lite.settings');
     $settings = $editor->getSettings();
 
-    // Lite settings, see http://www.loopindex.com/lite/docs/
     $config['lite'] = [
+      // Lite settings, see http://www.loopindex.com/lite/docs/
       'userId' => $this->currentUser->id(),
       'userName' => $this->currentUser->getDisplayName(),
       'tooltipTemplate' => $lite_settings->get('tooltipTemplate'),
-      // 'tooltips' => FALSE,.
-    ];
-
-    // Custom settings for this plugin.
-    $config['drupallite'] = [
+      // 'tooltips' => FALSE,
+      // Custom settings for this plugin.
       'permissions' => $this->getUserPermissions(),
-      'options' => isset($settings['plugins']['drupallite']) ? $settings['plugins']['drupallite'] : [],
+      'extra_permissions' => $lite_settings->get('extra_permissions'),
+      'options' => isset($settings['plugins']['lite']) ? $settings['plugins']['lite'] : [],
     ];
 
     return $config;
@@ -203,9 +201,10 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
    */
   public function settingsForm(array $form, FormStateInterface $form_state, Editor $editor) {
     $settings = $editor->getSettings();
+    $config = [];
 
-    if (isset($settings['plugins']['drupallite'])) {
-      $config = $settings['plugins']['drupallite'];
+    if (isset($settings['plugins']['lite'])) {
+      $config = $settings['plugins']['lite'];
     }
 
     if ($this->moduleHandler->moduleExists('help')) {
@@ -234,20 +233,6 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
       '#default_value' => isset($config['disable_new']) ? $config['disable_new'] : 0,
     ];
 
-    /*
-    $form['auto_show'] = [
-      '#title' => t('Enable show changes by default'),
-      '#description' => t('Enable Lite <em>show changes</em> when the editor is loaded with this text format.<br>If the <em>show changes</em> button is not in the toolbar, users will not be able to disable the show changes.'),
-      '#type' => 'checkbox',
-      '#default_value' => isset($config['auto_show']) ? $config['auto_show'] : 0,
-      '#states' => [
-        'visible' => [
-          ':input[data-editor-lite="auto_start"]' => ['checked' => TRUE],
-        ],
-      ],
-    ];
-    */
-
     if ($this->moduleHandler->moduleExists('content_moderation')) {
       $params = [
         ':url' => $this->urlGenerator->generateFromRoute('entity.workflow.collection'),
@@ -255,7 +240,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
       ];
       $form['moderation'] = [
         '#title' => t('Enable content moderation support'),
-        '#description' => $this->t('Extend Lite options by <a href=":url">Workflows</a> states for this text format. Could be used with <a href=":url_lite">permissions by states</a> enable.', $params),
+        '#description' => $this->t('Extend Lite options by <a href=":url">Workflows</a> states for this text format. Can be extended using the <a href=":url_lite">permissions by states</a>.', $params),
         '#type' => 'checkbox',
         '#default_value' => isset($config['moderation']) ? $config['moderation'] : 0,
         '#attributes' => [
@@ -316,24 +301,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
                 ],
               ],
             ];
-            /*
-            If (isset($config['moderation_options'][$worflow_id][$state_id]['auto_show'])) {
-              $default = $config['moderation_options'][$worflow_id][$state_id]['auto_show'];
-            }
-            else {
-              $default = 0;
-            }
-            $form['moderation_options'][$worflow_id][$state_id]['auto_show'] = [
-              '#title' => t('%state: enable show changes by default', ['%state' => $state->label()]),
-              '#type' => 'checkbox',
-              '#default_value' => $default,
-              '#states' => [
-                'visible' => [
-                  ':input[data-editor-lite-moderation="' . $worflow_id . '"]' => ['checked' => TRUE],
-                ],
-              ],
-            ];
-            */
+
           }
           // Open or close if we have this workflow enabled.
           if (isset($config['moderation_options'][$worflow_id]['enable']) && $config['moderation_options'][$worflow_id]['enable'] == 1) {
