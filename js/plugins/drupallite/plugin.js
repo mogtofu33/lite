@@ -56,9 +56,13 @@
       }
       // Moderation permission.
       else if (node && extra_permissions == 'permissions_by_states') {
+        debug && console.log('Check extra permissions by states: ' + node.workflow + '_' + node.state);
         if (node.moderated) {
           key = '_' + node.workflow + '_' + node.state;
           checkPermission(key, permissions, $user_can, debug);
+        }
+        else {
+          debug && console.log('Node not moderated.');
         }
       }
 
