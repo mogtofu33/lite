@@ -15,7 +15,7 @@ Installation
 * To download Lite library with composer using Composer template for Drupal
   https://github.com/drupal-composer/drupal-project, add these lines to your
   composer.json file:
-
+  <pre>
   "repositories": [
       {
           "type": "composer",
@@ -38,6 +38,7 @@ Installation
       ..... YOUR PACKAGES .....
       "library/lite": "1.2.28"
   },
+  </pre>
 
 * Enable any of the track changes buttons by dragging them into the active
   toolbar configuration for the desired text formats from the Text Formats
