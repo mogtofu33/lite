@@ -59,6 +59,7 @@ Content moderation
 
 If the Drupal Content Moderation module is enabled, Lite text format option by
 Workflow and by states will be available.
+
 Prior to text format configuration you must enable a Workflow on your content
 type and set the Workflow transitions permissions to your roles accordingly.
 
