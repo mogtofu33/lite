@@ -9,7 +9,9 @@ Installation
 
 * Normal module installation procedure. See
   https://www.drupal.org/documentation/install/modules-themes/modules-8
-* Download the version 1.2.28 of the LITE CKEditor plugin and extract it to sites/all/libraries or sites/sitename/libraries as you require. The extracted folder must be named lite.
+* Download the version 1.2.28 of the LITE CKEditor plugin and extract it to
+  sites/all/libraries or sites/sitename/libraries as you require. The extracted
+  folder must be named lite.
 * To download Lite library with composer using Composer template for Drupal
   https://github.com/drupal-composer/drupal-project, add these lines to your
   composer.json file:
@@ -37,7 +39,9 @@ Installation
       "library/lite": "1.2.28"
   },
 
-* Enable any of the track changes buttons by dragging them into the active toolbar configuration for the desired text formats from the Text Formats configuration page.
+* Enable any of the track changes buttons by dragging them into the active
+  toolbar configuration for the desired text formats from the Text Formats
+  configuration page.
 * If the Limit allowed HTML tags filter is enabled, add to the Allowed HTML tags:
   <del class="ice-del ice-cts-*" data-changedata data-cid data-last-change-time data-time data-username> <ins class="ice-ins ice-cts-*" data-changedata data-cid data-last-change-time data-time data-username>
 

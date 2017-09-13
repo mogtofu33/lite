@@ -196,8 +196,9 @@ function lite_disable_tracking($element) {
       if (isset($options['moderation'])) {
         if ($options['moderation'] == 0 || $node['moderated'] == FALSE || $options['moderation_options'][$node['workflow']]['enable'] == 0) {
           // We are not dealing with a moderated or text format settings is
-          // disable. By default tracking is always enable, we check if we need to
-          // disable it when not enable by default or disabled on new entities.
+          // disable. By default tracking is always enable, we check if we need
+          // to disable it when not enable by default or disabled on new
+          // entities.
           if ($options['auto_start'] == 0 || ($is_new && $options['disable_new'] == 1)) {
             $editor_settings['lite']['isTracking'] = FALSE;
           }

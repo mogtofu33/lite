@@ -23,7 +23,6 @@
           permissions = editor.config.lite.permissions,
           extra_permissions = editor.config.lite.extra_permissions,
           format = null,
-          // moderated = editor.config.lite.options.moderation,
           node = null,
           key = '',
           remove_buttons = '',
@@ -96,10 +95,9 @@
    *   The current user capability.
    * @param bool debug
    *   Flag to print log message in the console..
-   *
    */
   function checkPermission(key, permissions, $user_can, debug) {
-    $use_cases.forEach(function(use_case) {
+    $use_cases.forEach(function (use_case) {
       if (!$user_can[use_case] && permissions.indexOf(use_case + key) !== -1) {
         debug && console.log(use_case + ' ' + key + ': GRANTED');
         $user_can[use_case] = true;
