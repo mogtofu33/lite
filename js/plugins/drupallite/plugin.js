@@ -26,7 +26,7 @@
           node = null,
           key = '',
           remove_buttons = '',
-          debug = false;
+          debug = true;
 
       if (editor.config.hasOwnProperty('drupal')) {
         format = editor.config.drupal.format;
@@ -38,7 +38,7 @@
           node = drupalSettings.lite.node;
         }
         if (drupalSettings.lite.hasOwnProperty('debug')) {
-          debug = drupalSettings.lite.debug;
+          // Debug = drupalSettings.lite.debug;.
         }
         debug && console.log(drupalSettings.lite);
       }

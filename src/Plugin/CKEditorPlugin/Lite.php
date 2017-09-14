@@ -126,9 +126,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
    * {@inheritdoc}
    */
   public function getFile() {
-    $library = libraries_detect('lite');
-
-    return $library['library path'] . '/plugin.js';
+    return base_path() . 'libraries/lite/plugin.js';
   }
 
   /**
@@ -166,32 +164,36 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
    * {@inheritdoc}
    */
   public function getButtons() {
-    $library = libraries_detect('lite');
+    // $library = libraries_detect('lite');
+    // $libraryDiscovery = \Drupal::service('library.discovery');
+    // $library = $libraryDiscovery->getLibrariesByExtension('lite'));
+    // $library = $library['lite'];.
+    $path = base_path() . 'libraries/lite';
 
     return [
       'lite-acceptall' => [
         'label' => t('Accept all changes'),
-        'image' => $library['library path'] . '/icons/lite-acceptall.png',
+        'image' => $path . '/icons/lite-acceptall.png',
       ],
       'lite-rejectall' => [
         'label' => t('Reject all changes'),
-        'image' => $library['library path'] . '/icons/lite-rejectall.png',
+        'image' => $path . '/icons/lite-rejectall.png',
       ],
       'lite-acceptone' => [
         'label' => t('Accept change'),
-        'image' => $library['library path'] . '/icons/lite-acceptone.png',
+        'image' => $path . '/icons/lite-acceptone.png',
       ],
       'lite-rejectone' => [
         'label' => t('Reject change'),
-        'image' => $library['library path'] . '/icons/lite-rejectone.png',
+        'image' => $path . '/icons/lite-rejectone.png',
       ],
       'lite-toggleshow' => [
         'label' => t('Show/hide tracked changes'),
-        'image' => $library['library path'] . '/icons/lite-toggleshow.png',
+        'image' => $path . '/icons/lite-toggleshow.png',
       ],
       'lite-toggletracking' => [
         'label' => t('Start/stop tracking changes'),
-        'image' => $library['library path'] . '/icons/lite-toggletracking.png',
+        'image' => $path . '/icons/lite-toggletracking.png',
       ],
     ];
   }

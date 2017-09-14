@@ -43,9 +43,11 @@ Installation
 * Enable any of the track changes buttons by dragging them into the active
   toolbar configuration for the desired text formats from the Text Formats
   configuration page.
+* Enable the Lite filter and configure
+* Configure Lite permissions to allow roles to toggle or resolve changes
 * If the Limit allowed HTML tags filter is enabled, add to the Allowed HTML tags:
   ```
-  <del class="ice-del ice-cts-*" data-changedata data-cid data-last-change-time data-time data-username> <ins class="ice-ins ice-cts-*" data-changedata data-cid data-last-change-time data-time data-username>
+  <del class="ice-del ice-cts-*" data-changedata data-userid data-cid data-last-change-time data-time data-username> <ins class="ice-ins ice-cts-*" data-changedata data-userid data-cid data-last-change-time data-time data-username>
   ```
 
 Configuration
@@ -69,4 +71,6 @@ Known issues
 Lite 1.2.30 can cause an issue with images or copy/paste, see
 https://www.drupal.org/node/2907869
 
-When enabling image caption, the image will not be part of tracking.
+If an image is added without any text it should be not tracked.
+
+If image caption is enable, the image will not be tracked.

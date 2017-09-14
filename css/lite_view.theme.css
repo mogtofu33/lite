@@ -1,0 +1,66 @@
+ins,
+del {
+  text-decoration: none!important;
+}
+
+del.ice-del {
+  display: none;
+}
+
+ins.ice-ins,
+ins.ice-del {
+  white-space: pre-wrap;
+  text-decoration: none!important;
+}
+
+ins.ice-no-decoration,
+del.ice-no-decoration {
+  text-decoration: none!important;
+}
+
+span.ice-ins,
+ins.ice-ins,
+span.ice-del,
+del.ice-del {
+  color: #000;
+}
+
+span.ice-del,
+del.ice-del {
+  display: inline;
+  text-decoration: line-through!important;
+  color: #555;
+  background-color: #e5ffcd!important;
+}
+
+.ice-ins,
+.ice-ins>* {
+  background-color: #e5ffcd!important;
+}
+
+.ice-ins.ice-cts-1,
+.ice-ins.ice-cts-1>* {
+  background-color: #e5ffcd!important;
+}
+
+.ice-ins.ice-cts-2,
+.ice-ins.ice-cts-2>* {
+  background-color: #e3ffff!important;
+}
+
+.ice-ins.ice-cts-3,
+.ice-ins.ice-cts-3>* {
+  background-color: #fdd!important;
+}
+
+.ice-del.ice-cts-1 {
+  background-color: #e5ffcd!important;
+}
+
+.ice-del.ice-cts-2 {
+  background-color: #e3ffff!important;
+}
+
+.ice-del.ice-cts-3 {
+  background-color: #fdd!important;
+}

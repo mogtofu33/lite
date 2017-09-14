@@ -6,4 +6,3 @@ configure: lite.lite_settings_form
 core: 8.x
 dependencies:
   - drupal:ckeditor
-  - drupal:libraries

@@ -13,33 +13,33 @@ function lite_requirements($phase) {
 
   // Only check requirements during runtime.
   if ($phase == 'runtime') {
-    $requirements['lite_library'] = [
-      'title' => t('LITE CKEditor plugin'),
-      'severity' => REQUIREMENT_OK,
-    ];
-
-    // Check if the LITE CKEditor plugin library is installed.
-    if (($library = libraries_detect('lite')) && !empty($library['installed'])) {
-      // Check version installed.
-      if ($library['version'] < '1.2.28') {
-        $requirements['lite_library']['value'] = t('Lite version :version outdated, please install <a href=":url">1.2.28</a>', [':version' => $library['version'], ':url' => 'https://download.ckeditor.com/lite/releases/lite_1.2.28.zip']);
-        $requirements['lite_library']['severity'] = REQUIREMENT_WARNING;
-      }
-      // Force version 1.2.28 as 1.2.30 is currently not working properly
-      // see issue https://www.drupal.org/node/2907869
-      elseif ($library['version'] != '1.2.28') {
-        $requirements['lite_library']['value'] = t('Lite version :version not supported, please install <a href=":url">1.2.28</a>', [':version' => $library['version'], ':url' => 'https://download.ckeditor.com/lite/releases/lite_1.2.28.zip']);
-        $requirements['lite_library']['severity'] = REQUIREMENT_ERROR;
-      }
-      else {
-        $requirements['lite_library']['value'] = $library['version'];
-      }
-    }
-    else {
-      $requirements['lite_library']['severity'] = REQUIREMENT_ERROR;
-      $requirements['lite_library']['value'] = t('Not installed');
-      $requirements['lite_library']['description'] = $library['error message'];
-    }
+    // $requirements['lite_library'] = [
+    //   'title' => t('LITE CKEditor plugin'),
+    //   'severity' => REQUIREMENT_OK,
+    // ];
+    //
+    // // Check if the LITE CKEditor plugin library is installed.
+    // if (($library = libraries_detect('lite')) && !empty($library['installed'])) {
+    //   // Check version installed.
+    //   if ($library['version'] < '1.2.28') {
+    //     $requirements['lite_library']['value'] = t('Lite version :version outdated, please install <a href=":url">1.2.28</a>', [':version' => $library['version'], ':url' => 'https://download.ckeditor.com/lite/releases/lite_1.2.28.zip']);
+    //     $requirements['lite_library']['severity'] = REQUIREMENT_WARNING;
+    //   }
+    //   // Force version 1.2.28 as 1.2.30 is currently not working properly
+    //   // see issue https://www.drupal.org/node/2907869
+    //   elseif ($library['version'] != '1.2.28') {
+    //     $requirements['lite_library']['value'] = t('Lite version :version not supported, please install <a href=":url">1.2.28</a>', [':version' => $library['version'], ':url' => 'https://download.ckeditor.com/lite/releases/lite_1.2.28.zip']);
+    //     $requirements['lite_library']['severity'] = REQUIREMENT_ERROR;
+    //   }
+    //   else {
+    //     $requirements['lite_library']['value'] = $library['version'];
+    //   }
+    // }
+    // else {
+    //   $requirements['lite_library']['severity'] = REQUIREMENT_ERROR;
+    //   $requirements['lite_library']['value'] = t('Not installed');
+    //   $requirements['lite_library']['description'] = $library['error message'];
+    // }.
   }
 
   return $requirements;
