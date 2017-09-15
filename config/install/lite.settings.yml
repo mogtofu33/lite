@@ -1,4 +1,5 @@
 tooltipTemplate: '%a by %u %t'
+tLocale: 'm d y'
 langcode: en
 extra_permissions: ''
 debug: false

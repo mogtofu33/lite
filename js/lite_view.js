@@ -7,145 +7,226 @@
 
   'use strict';
 
-  var months = [
-    Drupal.t("Jan"),
-    Drupal.t("Feb"),
-    Drupal.t("Mar"),
-    Drupal.t("Apr"),
-    Drupal.t("May"),
-    Drupal.t("Jun"),
-    Drupal.t("Jul"),
-    Drupal.t("Aug"),
-    Drupal.t("Sep"),
-    Drupal.t("Oct"),
-    Drupal.t("Nov"),
-    Drupal.t("Dec"),
-  ];
+  Drupal.lite = Drupal.lite || {};
+
+  var datePicker = $.datepicker.setDefaults($.datepicker.regional[drupalSettings.path.currentLanguage]);
 
   /**
-   * Drupal behavior to handle imce linkit integration.
+   * Process ins and del produced by Lite plugin in the editor.
+   *
+   * @type {Drupal~behavior}
+   *
+   * @prop {Drupal~behaviorAttach} attach
+   *   Attaches lite behaviour to the Lite markup.
    */
   Drupal.behaviors.lite = {
     attach: function (context, settings) {
+
+      var tootlip_ui = 'opentip';
+
+      if (typeof Opentip === "undefined") {
+        // Test if we have Bootstrap Popver or Tooltip.
+        if (typeof $().popover() !== "undefined") {
+          tootlip_ui = 'popover';
+        }
+        else if (typeof $().tooltip() !== "undefined") {
+          tootlip_ui = 'tooltip';
+        }
+        else {
+          return;
+        }
+      }
+
+      // Prepare tooltip template.
       var tooltipTemplate = drupalSettings.lite.tooltipTemplate.replace(/\%/g, '@');
+
       $('.ice-ins, .ice-del', context).once('liteViewProcessed').each(function () {
-        new Opentip($(this), _makeTooltipTitle(tooltipTemplate, $(this)));
+        var $change = $(this);
+        var title = Drupal.lite.makeTooltipTitle(tooltipTemplate, $change);
+        if (tootlip_ui == 'opentip') {
+          new Opentip($change, title);
+        }
+        else if (tootlip_ui == 'popover') {
+          $change.popover({
+            delay: { "show": 500, "hide": 100 },
+            html: true,
+            placement: 'auto',
+            content: title,
+            trigger: 'hover',
+            template: '<div class="popover ' + $change.attr("class") + '" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+          });
+        }
+        else if (tootlip_ui == 'tooltip') {
+          $change.tooltip({
+            delay: { "show": 500, "hide": 100 },
+            html: true,
+            placement: 'auto',
+            title: title,
+            template:	'<div class="tooltip ' + $change.attr("class") + '" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+          });
+        }
       });
+
     }
   };
 
   /**
- * @ignore
- * @param change
- * @returns {Boolean}
- */
- function _makeTooltipTitle($title, elem) {
-    var change = {
-      'time': parseInt(elem.attr('data-time')),
-      'lastTime': parseInt(elem.attr('data-last-change-time')),
-      'userName': elem.attr('data-username'),
-      'type': elem.prop("tagName")
-    };
+   * Lite helpers functions adapatted from Lite plugin.
+   *
+   * These functions are just Drupal rewriten function of lite:
+   * https://github.com/loopindex/ckeditor-track-changes/blob/master/src/lite/plugin.js.
+   *
+   * @namespace
+   */
+  Drupal.lite = {
 
-        var time = new Date(change.time),
-              lastTime = new Date(change.lastTime),
-        $params = {
+    /**
+     * Create tooltip title replicating what's done in Lite plugin.js.
+     *
+     * Src/lite/plugin.js#L1823
+     *
+     * @param {object} datePicker
+     *   The Jquery UI Datepicker object.
+     * @param {string} title
+     *   The title template fromt Lite settings.
+     * @param {jQuery} $elem
+     *   A jQuery element containing Lite tag ins or del.
+     *
+     * @return {string}
+     *   The message processed through translation.
+     */
+    makeTooltipTitle: function (title, $elem) {
+      // Build base object based on element data.
+      var change = {
+        'type': $elem.prop("tagName"),
+        'time': parseInt($elem.attr('data-time')),
+        'lastTime': parseInt($elem.attr('data-last-change-time')),
+        'userName': $elem.attr('data-username')
+      };
+
+      // Prepare variable to replace in text.
+      var time = new Date(change.time),
+        lastTime = new Date(change.lastTime),
+        params = {
           '@a': ("INS" === change.type) ? Drupal.t('added') : Drupal.t('deleted'),
-          '@t': relativeDateFormat(time),
+          '@t': Drupal.lite.relativeDateFormat(time),
           '@u': change.userName,
-          '@dd': padNumber(time.getDate(), 2),
-                '@d': time.getDate(),
-                '@mm': padNumber(time.getMonth() + 1, 2),
-                '@m': time.getMonth() + 1,
-                '@yy': padNumber(time.getYear() - 100, 2),
-                '@y': time.getFullYear(),
-                '@nn': padNumber(time.getMinutes(), 2),
-                '@n': time.getMinutes(),
-                '@hh': padNumber(time.getHours(), 2),
-                '@h': time.getHours(),
-                '@T': relativeDateFormat(lastTime,),
-                '@DD': padNumber(lastTime.getDate(), 2),
-                '@D': lastTime.getDate(),
-                '@MM': padNumber(lastTime.getMonth() + 1, 2),
-                '@M': lastTime.getMonth() + 1,
-                '@YY': padNumber(lastTime.getYear() - 100, 2),
-                '@Y': lastTime.getFullYear(),
-                '@NN': padNumber(lastTime.getMinutes(), 2),
-                '@N': lastTime.getMinutes(),
-                '@HH': padNumber(lastTime.getHours(), 2),
-                '@H': lastTime.getHours(),
+          '@dd': datePicker.formatDate("d", time),
+          '@d': time.getDate(),
+          '@mm': datePicker.formatDate("mm", time),
+          '@m': time.getMonth() + 1,
+          '@yy': datePicker.formatDate("y", time),
+          '@y': time.getFullYear(),
+          '@nn': Drupal.lite.padNumber(time.getMinutes(), 2),
+          '@n': time.getMinutes(),
+          '@hh': Drupal.lite.padNumber(time.getHours(), 2),
+          '@h': time.getHours(),
+          '@T': Drupal.lite.relativeDateFormat(lastTime),
+          '@DD': datePicker.formatDate("d", lastTime),
+          '@D': lastTime.getDate(),
+          '@MM': datePicker.formatDate("mm", lastTime),
+          '@M': lastTime.getMonth() + 1,
+          '@YY': datePicker.formatDate("y", lastTime),
+          '@Y': lastTime.getFullYear(),
+          '@NN': Drupal.lite.padNumber(lastTime.getMinutes(), 2),
+          '@N': lastTime.getMinutes(),
+          '@HH': Drupal.lite.padNumber(lastTime.getHours(), 2),
+          '@H': lastTime.getHours(),
         };
 
-        return Drupal.t($title, $params);
+      // Build text message using params replacment.
+      return Drupal.t(title, params);
+    },
+
+    /**
+     * Transform date to a relative format. From src/lite/plugin.js#L258.
+     *
+     * @param {object} date
+     *   The date object.
+     *
+     * @return {string}
+     *   The relative format string.
+     */
+    relativeDateFormat: function (date) {
+      var now = new Date(),
+        today = now.getDate(),
+        month = now.getMonth(),
+        year = now.getFullYear(),
+        minutes;
+
+      var t = typeof date;
+
+      if (t === "string" || t === "number") {
+        date = new Date(date);
+      }
+
+      // Today.
+      if (today == date.getDate() && month == date.getMonth() && year == date.getFullYear()) {
+        minutes = Math.floor((now.getTime() - date.getTime()) / 60000);
+
+        if (minutes < 1) {
+          return Drupal.t('now');
         }
-
-    function relativeDateFormat(date) {
-          var now = new Date(),
-              today = now.getDate(),
-              month = now.getMonth(),
-              year = now.getFullYear(),
-              minutes, hours;
-
-          var t = typeof(date);
-
-          if (t === "string" || t === "number") {
-              date = new Date(date);
-          }
-
-          if (today == date.getDate() && month == date.getMonth() && year == date.getFullYear()) {
-              minutes = Math.floor((now.getTime() - date.getTime()) / 60000);
-              if (minutes < 1) {
-                  return Drupal.t('now');
-              }
-              else if (minutes < 60) {
-                  return (Drupal.formatPlural(minutes, '1 minute ago', '@minutes minutes ago'));
-              }
-              else {
-                  hours = date.getHours();
-                  minutes = date.getMinutes();
-                  return Drupal.t('on') + " " + padNumber(hours, 2) + ":" + padNumber(minutes, 2, "0");
-              }
-          }
-          else if (year == date.getFullYear()) {
-              return Drupal.t('on') + " " + label_dates(date.getDate(), date.getMonth());
-          }
-          else {
-              return Drupal.t('on') + " " + label_dates(date.getDate(), date.getMonth(), date.getFullYear());
-          }
+else if (minutes < 60) {
+          return Drupal.formatPlural(minutes, '1 minute ago', '@count minutes ago');
+        }
+else {
+          return Drupal.t('on') + " " + Drupal.lite.padNumber(date.getHours(), 2) + ":" + Drupal.lite.padNumber(date.getMinutes(), 2);
+        }
+      // This year.
       }
-
-    function label_dates(day, month, year) {
-          if (typeof(year) != 'undefined') {
-              year = ", " + year;
-          }
-          else {
-              year = "";
-          }
-          return months[month] + " " + day + year;
+else if (year == date.getFullYear()) {
+        // We remove year in the result.
+              return Drupal.t('on') + " " + datePicker.formatDate(drupalSettings.lite.tLocale.replace(/y/g, ''), date);
       }
-
-    function padNumber(s, length) {
-          return padString(s, length, '0');
+else {
+        return Drupal.t('on') + " " + datePicker.formatDate(drupalSettings.lite.tLocale, date);
       }
+    },
 
-    function padString(s, length, padWith, bSuffix) {
+    /**
+     * Wrapper helper to pad number.
+     *
+     * @param {string} s
+     *   The string to process.
+     * @param {integer} length
+     *   The pad offset.
+     *
+     * @return {string}
+     *   The padded number.
+     */
+    padNumber: function (s, length) {
+      return Drupal.lite.padString(s, length, '0');
+    },
+
+    /**
+     * Pad a string.
+     *
+     * @param {string} s
+     *   The string to process.
+     * @param {integer} length
+     *   The pad offset.
+     * @param {integer} padWith
+     *   The pad width.
+     *
+     * @return {string}
+     *   The padded string.
+     */
+    padString: function (s, length, padWith) {
       if (null === s || (typeof(s) === "undefined")) {
         s = "";
       }
-      else {
+else {
         s = String(s);
       }
       padWith = String(padWith);
       var padLength = padWith.length;
       for (var i = s.length; i < length; i += padLength) {
-        if (bSuffix) {
-          s += padWith;
-        }
-        else {
-          s = padWith + s;
-        }
+        s = padWith + s;
       }
       return s;
     }
+
+  };
 
 })(jQuery, Drupal, drupalSettings);

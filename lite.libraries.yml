@@ -8,9 +8,6 @@ lite:
   js:
     /libraries/lite/lite-interface.js: {}
     /libraries/lite/plugin.js: {}
-  css:
-    component:
-      /libraries/lite/css/opentip.css: {}
   dependencies:
     - core/jquery
     - core/ckeditor
@@ -22,21 +19,24 @@ opentip:
     url: https://github.com/enyo/opentip#license
     gpl-compatible: true
   js:
-    /libraries/opentip/downloads/opentip-jquery.js: {}
+    /libraries/opentip/opentip-jquery.min.js: { minified: true }
   css:
     component:
-      /libraries/opentip/css/opentip.css: {}
+      # Load css from Lite for consistency between Wysiwyg and front.
+      /libraries/lite/css/opentip.css: {}
   dependencies:
     - core/jquery
 lite.view:
   version: VERSION
   js:
     js/lite_view.js: {}
-  css:
-    theme:
-      css/lite_view.theme.css: {}
   dependencies:
-    - core/jquery
-    - core/jquery.once
     - core/drupal
     - core/drupalSettings
+    - core/jquery.once
+    - core/jquery.ui.datepicker
+lite.theme:
+  css:
+    theme:
+      /libraries/lite/css/lite.css: {}
+      css/lite_view.theme.css: {}

@@ -80,9 +80,15 @@ class Lite extends FilterBase {
     // Show changes on view mode, we need our libraries.
     if ($this->settings['view']) {
       $config = \Drupal::config('lite.settings');
+      // $date = \Drupal::config('core.date_format.long');.
       $result->setAttachments([
-        'library' => ['lite/opentip', 'lite/lite.view'],
-        'drupalSettings' => ['lite' => ['tooltipTemplate' => $config->get('tooltipTemplate')]],
+        'library' => ['lite/opentip', 'lite/lite.view', 'lite/lite.theme'],
+        'drupalSettings' => [
+          'lite' => [
+            'tooltipTemplate' => $config->get('tooltipTemplate'),
+            'tLocale' => $config->get('tLocale'),
+          ],
+        ],
       ]);
     }
     // Or clean and process markup.

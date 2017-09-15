@@ -1,22 +1,4 @@
-ins,
-del {
-  text-decoration: none!important;
-}
-
-del.ice-del {
-  display: none;
-}
-
-ins.ice-ins,
-ins.ice-del {
-  white-space: pre-wrap;
-  text-decoration: none!important;
-}
-
-ins.ice-no-decoration,
-del.ice-no-decoration {
-  text-decoration: none!important;
-}
+/* Replicate lite css without .ICE-Tracking class for view display */
 
 span.ice-ins,
 ins.ice-ins,
@@ -63,4 +45,63 @@ del.ice-del {
 
 .ice-del.ice-cts-3 {
   background-color: #fdd!important;
+}
+
+/* Add some colors to the Lite default palette.*/
+
+ins.ice-ins.ice-cts-4,
+ins.ice-ins.ice-cts-4>*,
+.ICE-Tracking ins.ice-ins.ice-cts-4,
+.ICE-Tracking ins.ice-ins.ice-cts-4>*,
+del.ice-del.ice-cts-4,
+.ICE-Tracking del.ice-del.ice-cts-4 {
+  background-color: #ffefcd!important;
+}
+
+ins.ice-ins.ice-cts-5,
+ins.ice-ins.ice-cts-5>* .ICE-Tracking ins.ice-ins.ice-cts-5,
+.ICE-Tracking ins.ice-ins.ice-cts-5>*,
+del.ice-del.ice-cts-5,
+.ICE-Tracking del.ice-del.ice-cts-5 {
+  background-color: #cdd9ff!important;
+}
+
+ins.ice-ins.ice-cts-6,
+ins.ice-ins.ice-cts-6>* .ICE-Tracking ins.ice-ins.ice-cts-6,
+.ICE-Tracking ins.ice-ins.ice-cts-6>*,
+del.ice-del.ice-cts-6,
+.ICE-Tracking del.ice-del.ice-cts-6 {
+  background-color: #ebcdff!important;
+}
+
+ins.ice-ins.ice-cts-7,
+ins.ice-ins.ice-cts-7>* .ICE-Tracking ins.ice-ins.ice-cts-7,
+.ICE-Tracking ins.ice-ins.ice-cts-7>*,
+del.ice-del.ice-cts-7,
+.ICE-Tracking del.ice-del.ice-cts-7 {
+  background-color: #feffcd!important;
+}
+
+ins.ice-ins.ice-cts-8,
+ins.ice-ins.ice-cts-8>* .ICE-Tracking ins.ice-ins.ice-cts-8,
+.ICE-Tracking ins.ice-ins.ice-cts-8>*,
+del.ice-del.ice-cts-8,
+.ICE-Tracking del.ice-del.ice-cts-8 {
+  background-color: #c4dab0!important;
+}
+
+ins.ice-ins.ice-cts-9,
+ins.ice-ins.ice-cts-9>* .ICE-Tracking ins.ice-ins.ice-cts-9,
+.ICE-Tracking ins.ice-ins.ice-cts-9>*,
+del.ice-del.ice-cts-9,
+.ICE-Tracking del.ice-del.ice-cts-9 {
+  background-color: #c3dcdc!important;
+}
+
+ins.ice-ins.ice-cts-10,
+ins.ice-ins.ice-cts-10>* .ICE-Tracking ins.ice-ins.ice-cts-10,
+.ICE-Tracking ins.ice-ins.ice-cts-10>*,
+del.ice-del.ice-cts-10,
+.ICE-Tracking del.ice-del.ice-cts-10 {
+  background-color: #e79c4c!important;
 }

@@ -119,6 +119,13 @@ class LiteSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('tooltipTemplate'),
     ];
 
+    $form['tLocale'] = [
+      '#title' => $this->t('Tooltip %t format'),
+      '#type' => 'textfield',
+      '#description' => $this->t('If using %t wildcard on tooltip template, when displaying full date you can localize date format.<br>See jQuery<a href=":url"> Datepicker formatDate</a> for available formats.', [':url' => 'http://api.jqueryui.com/datepicker/#utility-formatDate']),
+      '#default_value' => $config->get('tLocale'),
+    ];
+
     $form['debug'] = [
       '#title' => $this->t('Enable debug'),
       '#description' => $this->t('Display information on the javascript console of the browser when using the Wysiwyg with Lite to ease configuration.'),
@@ -137,6 +144,7 @@ class LiteSettingsForm extends ConfigFormBase {
 
     $this->config('lite.settings')
       ->set('tooltipTemplate', $form_state->getValue('tooltipTemplate'))
+      ->set('tLocale', $form_state->getValue('tLocale'))
       ->set('extra_permissions', $form_state->getValue('extra_permissions'))
       ->set('debug', $form_state->getValue('debug'))
       ->save();
