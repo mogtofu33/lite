@@ -9,9 +9,10 @@ Installation
 
 * Normal module installation procedure. See
   https://www.drupal.org/documentation/install/modules-themes/modules-8
-* Download the version 1.2.28 of the LITE CKEditor plugin  from
+* Download the version **1.2.28** of the LITE CKEditor plugin  from
   https://ckeditor.com/addon/lite and extract it to /libraries. The extracted
-  folder must be named lite.
+  folder must be named lite. So Lite plugin file can be accessed from
+  _/libraries/lite/plugin.js_
 * To download Lite library with composer using Composer template for Drupal
   https://github.com/drupal-composer/drupal-project, add these lines to your
   composer.json file:
@@ -40,12 +41,14 @@ Installation
   },
   ```
 
-* (Optionnal) By default changes are only visible in the Wysywig editor, if you
-  want to display changes on the view mode with tooltip support you must install
-  Opentip library.
+* **Optionnal** By default changes are only visible in the Wysywig editor, if you
+  want to display changes on the _view mode_ with _tooltip_ support you must install
+  **Opentip** library.
   Create a folder opentip in your /libraries folder.
   From https://github.com/enyo/opentip/tree/master/downloads, download
-  opentip-jquery.js and place it in /libraries/opentip
+  **opentip-jquery.min.js** and place it in /libraries/opentip, so your file can
+  be accessed from
+  _/libraries/opentip/opentip-jquery.min.js_
 * Visit status report to ensure your Lite plugin is correctly loaded.
 * Enable any of the track changes buttons by dragging them into the active
   toolbar configuration for the desired text formats from the Text Formats
@@ -59,6 +62,9 @@ Installation
 
 Configuration
 ------------
+
+Lite plugin default state settings are available from the text format
+configuration form.
 
 After the installation, you can configure specific options form
 /admin/config/content/lite/settings
