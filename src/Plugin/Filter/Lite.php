@@ -13,9 +13,10 @@ use Drupal\Component\Utility\Html;
  * @Filter(
  *   id = "lite",
  *   title = @Translation("Lite changes tracking"),
- *   description = @Translation("Hide &lt;ins&gt; and &lt;del&gt; markup from Lite tracking changes in the view mode of the content."),
+ *   description = @Translation("Process tracking and hide or enable changes information on view mode."),
  *   type = Drupal\filter\Plugin\FilterInterface::TYPE_TRANSFORM_REVERSIBLE,
  *   settings = {
+ *     "view" = 0,
  *     "clean" = 0,
  *     "list" = "ul ol blockquote"
  *   }
@@ -27,13 +28,32 @@ class Lite extends FilterBase {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
+    $form['view'] = [
+      '#title' => t('Show changes on view mode'),
+      '#description' => $this->t('Display track changes in view mode with tooltips. If disable track changes will be visible only when editing.'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->settings['view'],
+      '#attributes' => [
+        'data-editor-lite' => 'view',
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[data-editor-lite="clean"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
     $form['clean'] = [
-      '#title' => t('Clean empty markup'),
-      '#description' => $this->t('If a change or a list of changes is included in a list or a container tag, the changes will be hidden but not the container tag. In some cases, like for list or Blockquote, an empty markup will be visible. Use this option to remove empty tags.'),
+      '#title' => t('Clean empty markup when hiding changes'),
+      '#description' => $this->t('If track chnages are not displayed on view mode, when a change or a list of changes is included in a list or a container tag, changes will be hidden but not the container tag. In some cases, like for list or Blockquote, an empty markup will be visible. Use this option to remove empty tags.'),
       '#type' => 'checkbox',
       '#default_value' => $this->settings['clean'],
       '#attributes' => [
         'data-editor-lite' => 'clean',
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[data-editor-lite="view"]' => ['checked' => FALSE],
+        ],
       ],
     ];
     $form['list'] = [
@@ -44,6 +64,7 @@ class Lite extends FilterBase {
       '#states' => [
         'visible' => [
           ':input[data-editor-lite="clean"]' => ['checked' => TRUE],
+          ':input[data-editor-lite="view"]' => ['checked' => FALSE],
         ],
       ],
     ];
@@ -56,7 +77,22 @@ class Lite extends FilterBase {
   public function process($text, $langcode) {
     $result = new FilterProcessResult($text);
 
-    if (strpos($text, 'ice-ins') !== FALSE || strpos($text, 'ice-del') !== FALSE) {
+    // Show changes on view mode, we need our libraries.
+    if ($this->settings['view']) {
+      $config = \Drupal::config('lite.settings');
+      // $date = \Drupal::config('core.date_format.long');.
+      $result->setAttachments([
+        'library' => ['lite/opentip', 'lite/lite.view', 'lite/lite.theme'],
+        'drupalSettings' => [
+          'lite' => [
+            'tooltipTemplate' => $config->get('tooltipTemplate'),
+            'tLocale' => $config->get('tLocale'),
+          ],
+        ],
+      ]);
+    }
+    // Or clean and process markup.
+    elseif (strpos($text, 'ice-ins') !== FALSE || strpos($text, 'ice-del') !== FALSE) {
       $result->setProcessedText($this->processChanges($text));
     }
 

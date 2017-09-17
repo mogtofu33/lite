@@ -13,34 +13,131 @@ function lite_requirements($phase) {
 
   // Only check requirements during runtime.
   if ($phase == 'runtime') {
+    $has_lite_version = _lite_verify_library('lite', 'lite', TRUE);
+
     $requirements['lite_library'] = [
       'title' => t('LITE CKEditor plugin'),
-      'severity' => REQUIREMENT_OK,
+      'value' => $has_lite_version ? t('Detected version :version', [':version' => $has_lite_version]) : t('Not found'),
     ];
 
-    // Check if the LITE CKEditor plugin library is installed.
-    if (($library = libraries_detect('lite')) && !empty($library['installed'])) {
+    if (!$has_lite_version) {
+      $requirements['lite_library']['severity'] = REQUIREMENT_ERROR;
+      $requirements['lite_library']['description'] = [
+        '#prefix' => ' ',
+        '#markup' => t('Lite module requires LITE plugin library 1.2.28. See README.md file for instructions.'),
+      ];
+    }
+    else {
       // Check version installed.
-      if ($library['version'] < '1.2.28') {
-        $requirements['lite_library']['value'] = t('Lite version :version outdated, please install <a href=":url">1.2.28</a>', [':version' => $library['version'], ':url' => 'https://download.ckeditor.com/lite/releases/lite_1.2.28.zip']);
+      if ($has_lite_version < '1.2.28') {
         $requirements['lite_library']['severity'] = REQUIREMENT_WARNING;
+        $requirements['lite_library']['description'] = [
+          '#prefix' => ' ',
+          '#markup' => t('Lite version detected :version outdated, please install version <a href=":url">1.2.28</a>.', [':version' => $has_lite_version, ':url' => 'https://download.ckeditor.com/lite/releases/lite_1.2.28.zip']),
+        ];
       }
       // Force version 1.2.28 as 1.2.30 is currently not working properly
       // see issue https://www.drupal.org/node/2907869
-      elseif ($library['version'] != '1.2.28') {
-        $requirements['lite_library']['value'] = t('Lite version :version not supported, please install <a href=":url">1.2.28</a>', [':version' => $library['version'], ':url' => 'https://download.ckeditor.com/lite/releases/lite_1.2.28.zip']);
+      elseif ($has_lite_version > '1.2.28') {
         $requirements['lite_library']['severity'] = REQUIREMENT_ERROR;
-      }
-      else {
-        $requirements['lite_library']['value'] = $library['version'];
+        $requirements['lite_library']['description'] = [
+          '#prefix' => ' ',
+          '#markup' => t('Lite version detected :version not supported, please install version <a href=":url">1.2.28</a>.', [':version' => $has_lite_version, ':url' => 'https://download.ckeditor.com/lite/releases/lite_1.2.28.zip']),
+        ];
       }
     }
-    else {
-      $requirements['lite_library']['severity'] = REQUIREMENT_ERROR;
-      $requirements['lite_library']['value'] = t('Not installed');
-      $requirements['lite_library']['description'] = $library['error message'];
+
+    $has_opentip = _lite_verify_library('lite', 'opentip');
+    $requirements['opentip_library'] = [
+      'title' => t('Opentip plugin'),
+      'value' => $has_opentip ? t('Enabled') : t('Not found'),
+    ];
+
+    if (!$has_opentip) {
+      $requirements['opentip_library']['severity'] = REQUIREMENT_WARNING;
+      $requirements['opentip_library']['description'] = [
+        '#prefix' => ' ',
+        '#markup' => t('OpenTip is recommended if you want to show changes in view mode for Lite track changes. See README.md file for instructions.'),
+      ];
     }
   }
 
   return $requirements;
+}
+
+/**
+ * Verify that the library files exist.
+ *
+ * @param string $extension
+ *   The name of the extension that registered a library.
+ * @param string $name
+ *   The name of a registered library to retrieve.
+ *
+ * @return bool
+ *   TRUE if all files of this library exists, FALSE otherwise
+ *
+ * @see https://drupal.org/node/2231385
+ */
+function _lite_verify_library($extension, $name, $check_version = FALSE) {
+  /** @var Drupal\Core\Asset\LibraryDiscovery $library_discovery */
+  $library_discovery = \Drupal::service('library.discovery');
+  $library = $library_discovery->getLibraryByName($extension, $name);
+
+  $exist = TRUE;
+  if ($library['js']) {
+    foreach ($library['js'] as $js) {
+      if ($js['type'] == 'file') {
+        if (!file_exists(DRUPAL_ROOT . '/' . $js['data'])) {
+          $exist = FALSE;
+        }
+      }
+    }
+  }
+
+  if ($library['css']) {
+    foreach ($library['css'] as $css) {
+      if ($css['type'] == 'file') {
+        if (!file_exists(DRUPAL_ROOT . '/' . $css['data'])) {
+          $exist = FALSE;
+        }
+      }
+    }
+  }
+
+  // Return the version number instead of bool.
+  if ($exist && $check_version) {
+    return _lite_libraries_get_lite_version();
+  }
+
+  return $exist;
+}
+
+/**
+ * Gets the version information for LIte plugin library.
+ *
+ * @return string|bool
+ *   A string containing the version of the library.
+ */
+function _lite_libraries_get_lite_version() {
+  // Provide options for Lite.
+  $options = [
+    // /* Source version: 1.2.28 */.
+    'pattern' => '/Source version: (\d+\.\d+\.\d+)/',
+    'lines' => 1,
+    'cols' => 30,
+  ];
+
+  $file = DRUPAL_ROOT . '/libraries/lite/plugin.js';
+  if (!file_exists($file)) {
+    return FALSE;
+  }
+  $file = fopen($file, 'r');
+  while ($options['lines'] && $line = fgets($file, $options['cols'])) {
+    if (preg_match($options['pattern'], $line, $version)) {
+      fclose($file);
+      return $version[1];
+    }
+    $options['lines']--;
+  }
+  fclose($file);
 }

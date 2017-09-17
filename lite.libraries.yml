@@ -1,0 +1,42 @@
+lite:
+  remote: http://ckeditor.com/addon/lite
+  version: 1.2.28
+  license:
+    name: GPL
+    url: http://www.gnu.org/copyleft/gpl.html
+    gpl-compatible: true
+  js:
+    /libraries/lite/lite-interface.js: {}
+    /libraries/lite/plugin.js: {}
+  dependencies:
+    - core/jquery
+    - core/ckeditor
+opentip:
+  remote: http://www.opentip.org/
+  version: 2.4.6
+  license:
+    name: MIT
+    url: https://github.com/enyo/opentip#license
+    gpl-compatible: true
+  js:
+    /libraries/opentip/opentip-jquery.min.js: { minified: true }
+  css:
+    component:
+      # Load css from Lite for consistency between Wysiwyg and front.
+      /libraries/lite/css/opentip.css: {}
+  dependencies:
+    - core/jquery
+lite.view:
+  version: VERSION
+  js:
+    js/lite_view.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery.once
+    - core/jquery.ui.datepicker
+lite.theme:
+  css:
+    theme:
+      /libraries/lite/css/lite.css: {}
+      css/lite_view.theme.css: {}

@@ -126,9 +126,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
    * {@inheritdoc}
    */
   public function getFile() {
-    $library = libraries_detect('lite');
-
-    return $library['library path'] . '/plugin.js';
+    return base_path() . 'libraries/lite/plugin.js';
   }
 
   /**
@@ -166,32 +164,32 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
    * {@inheritdoc}
    */
   public function getButtons() {
-    $library = libraries_detect('lite');
+    $path = base_path() . 'libraries/lite';
 
     return [
       'lite-acceptall' => [
         'label' => t('Accept all changes'),
-        'image' => $library['library path'] . '/icons/lite-acceptall.png',
+        'image' => $path . '/icons/lite-acceptall.png',
       ],
       'lite-rejectall' => [
         'label' => t('Reject all changes'),
-        'image' => $library['library path'] . '/icons/lite-rejectall.png',
+        'image' => $path . '/icons/lite-rejectall.png',
       ],
       'lite-acceptone' => [
         'label' => t('Accept change'),
-        'image' => $library['library path'] . '/icons/lite-acceptone.png',
+        'image' => $path . '/icons/lite-acceptone.png',
       ],
       'lite-rejectone' => [
         'label' => t('Reject change'),
-        'image' => $library['library path'] . '/icons/lite-rejectone.png',
+        'image' => $path . '/icons/lite-rejectone.png',
       ],
       'lite-toggleshow' => [
         'label' => t('Show/hide tracked changes'),
-        'image' => $library['library path'] . '/icons/lite-toggleshow.png',
+        'image' => $path . '/icons/lite-toggleshow.png',
       ],
       'lite-toggletracking' => [
         'label' => t('Start/stop tracking changes'),
-        'image' => $library['library path'] . '/icons/lite-toggletracking.png',
+        'image' => $path . '/icons/lite-toggletracking.png',
       ],
     ];
   }
@@ -281,10 +279,19 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
             ],
           ];
 
+          $states = [];
           $workflow = Workflow::load($worflow_id);
-          $states = $workflow->getStates();
+          // Drupal 8.3 or Drupal 8.4.
+          if (method_exists($workflow, 'getstates')) {
+            $states = $workflow->getStates();
+          }
+          elseif (method_exists($workflow->getTypePlugin(), 'getstates')) {
+            $states = $workflow->getTypePlugin()->getStates();
+          }
+
           foreach ($states as $state) {
             $state_id = $state->id();
+            $state_label = $state->label();
             if (isset($config['moderation_options'][$worflow_id][$state_id]['auto_start'])) {
               $default = $config['moderation_options'][$worflow_id][$state_id]['auto_start'];
             }
@@ -292,7 +299,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
               $default = 0;
             }
             $form['moderation_options'][$worflow_id][$state_id]['auto_start'] = [
-              '#title' => t('%state: enable tracking changes by default', ['%state' => $state->label()]),
+              '#title' => t('%state: enable tracking changes by default', ['%state' => $state_label]),
               '#type' => 'checkbox',
               '#default_value' => $default,
               '#states' => [

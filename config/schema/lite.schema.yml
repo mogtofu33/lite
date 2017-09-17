@@ -7,6 +7,9 @@ lite.settings:
     tooltipTemplate:
       type: text
       label: 'Tracking tooltip template'
+    tLocale:
+      type: text
+      label: 'Tracking tooltip date format'
     extra_permissions:
       type: text
       label: 'Add extra permissions'

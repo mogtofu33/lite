@@ -22,13 +22,19 @@ function lite_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<p>';
       $output .= t('You should create a specific text format and probably a content type and roles for easiest configuration of Lite.');
-      $output .= '<br>' . t('Module <a href=":url">allowed formats</a> can help you force tracking on a content type.', [':url' => 'https://www.drupal.org/project/allowed_formats']);
       $output .= '</p>';
       $output .= '<h4>' . t('Basic usage') . '</h4>';
       $output .= '<p>';
-      $output .= t('From the text format settings you can enable <em>tracking by default</em> on Lite options. If the role do not have the permission provided by this module to toggle tracking, it will be forced.');
-      $output .= '<br>' . t('Users still can avoid tracking even when forced if they got access to the source button or a text format without Lite enable.');
-      $output .= '<br>' . t('This module permissions can restrict accept / reject changes to specific roles.') . '</p>';
+      $output .= t('From the text format settings you can enable <em>tracking by default</em> on Lite options. If the role do not have the permission provided by this module to toggle tracking, it will be forced and the toggle button will not be available.');
+      $output .= '<br>' . t('Users still can avoid tracking even when forced if they got access to the <em>source</em> button or if they can select an other text format without Lite enable.');
+      $output .= '<br>' . t('Module <a href=":url">allowed formats</a> can help you force tracking on a content type.', [':url' => 'https://www.drupal.org/project/allowed_formats']);
+      $output .= '<br>' . t('Note that currently Drupal Image is not well supported. If the image is added alone it should not be tracked and if caption is enable the image will never be tracked.');
+      $output .= '<br>' . t('This module permissions can restrict accept / reject changes to specific roles.');
+      $output .= '</p>';
+      $output .= '<p>';
+      $output .= t('If the <b>Limit allowed HTML tags</b> filter is enabled, add to the Allowed HTML tags:');
+      $output .= '<pre>&lt;del class="ice-del ice-cts-*" data-changedata data-userid data-cid data-last-change-time data-time data-username&gt; &lt;ins class="ice-ins ice-cts-*" data-changedata data-userid data-cid data-last-change-time data-time data-username&gt;</pre>';
+      $output .= '</p>';
       $output .= '<h4>' . t('Advanced settings') . '</h4>';
       $output .= '<p>' . t('You can enable <a href=":url">extra permissions</a> by text formats to get a more fine grain permissions. Note that main permissions always override permissions by formats.', [':url' => $url->generate('lite.lite_settings_form')]) . '</p>';
       $output .= '<h4>' . t('Content moderation support') . '</h4>';
@@ -51,32 +57,6 @@ function lite_help($route_name, RouteMatchInterface $route_match) {
     break;
 
   }
-}
-
-/**
- * Implements hook_libraries_info().
- */
-function lite_libraries_info() {
-  return [
-    'lite' => [
-      'name' => 'LITE',
-      'vendor url' => 'http://www.loopindex.com/portfolio-item/track-changes-plugin/',
-      'download url' => 'http://ckeditor.com/addon/lite',
-      'version arguments' => [
-        'file' => 'plugin.js',
-        // /* Source version: 1.2.28 */.
-        'pattern' => '/Source version: (\d+\.\d+\.\d+)/',
-        'lines' => 1,
-      ],
-      'files' => [
-        'js' => [
-          'lite-includes.js',
-          'lite-interface.js',
-          'plugin.js',
-        ],
-      ],
-    ],
-  ];
 }
 
 /**
@@ -168,8 +148,7 @@ function lite_disable_tracking($element) {
     $is_new = $node['new'];
     $element['#attached']['drupalSettings']['lite']['node'] = $node;
     $config = \Drupal::config('lite.settings');
-    $debug = $config->get('debug');
-    $element['#attached']['drupalSettings']['lite']['debug'] = $debug;
+    $element['#attached']['drupalSettings']['lite']['debug'] = $config->get('debug');
   }
   else {
     return $element;
@@ -320,4 +299,12 @@ function lite_permissions_by_states($base_permissions) {
   }
 
   return $permissions;
+}
+
+/**
+ * Implements hook_ckeditor_css_alter().
+ */
+function lite_ckeditor_css_alter(&$css, $editor) {
+  // Add lite css overirride for consistency from the front/back.
+  $css[] = drupal_get_path('module', 'lite') . '/css/lite_view.theme.css';
 }

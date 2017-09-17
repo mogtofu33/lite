@@ -1,4 +1,4 @@
-name: Lite
+name: Lite CKeditor track changes
 type: module
 description: "Integrates the lite track changes plugin for CKEditor with Drupal."
 package: Ckeditor
@@ -6,4 +6,3 @@ configure: lite.lite_settings_form
 core: 8.x
 dependencies:
   - drupal:ckeditor
-  - drupal:libraries
