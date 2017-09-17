@@ -43,8 +43,8 @@ class Lite extends FilterBase {
       ],
     ];
     $form['clean'] = [
-      '#title' => t('Clean empty markup'),
-      '#description' => $this->t('If a change or a list of changes is included in a list or a container tag, the changes will be hidden but not the container tag. In some cases, like for list or Blockquote, an empty markup will be visible. Use this option to remove empty tags.'),
+      '#title' => t('Clean empty markup when hiding changes'),
+      '#description' => $this->t('If track chnages are not displayed on view mode, when a change or a list of changes is included in a list or a container tag, changes will be hidden but not the container tag. In some cases, like for list or Blockquote, an empty markup will be visible. Use this option to remove empty tags.'),
       '#type' => 'checkbox',
       '#default_value' => $this->settings['clean'],
       '#attributes' => [
