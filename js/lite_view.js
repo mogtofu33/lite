@@ -22,19 +22,9 @@
   Drupal.behaviors.lite = {
     attach: function (context, settings) {
 
-      var tootlip_ui = 'opentip';
-
+      // Check opentip is here.
       if (typeof Opentip === "undefined") {
-        // Test if we have Bootstrap Popver or Tooltip.
-        if (typeof $().popover() !== "undefined") {
-          tootlip_ui = 'popover';
-        }
-        else if (typeof $().tooltip() !== "undefined") {
-          tootlip_ui = 'tooltip';
-        }
-        else {
-          return;
-        }
+        return;
       }
 
       // Prepare tooltip template.
@@ -43,28 +33,7 @@
       $('.ice-ins, .ice-del', context).once('liteViewProcessed').each(function () {
         var $change = $(this);
         var title = Drupal.lite.makeTooltipTitle(tooltipTemplate, $change);
-        if (tootlip_ui == 'opentip') {
-          new Opentip($change, title);
-        }
-        else if (tootlip_ui == 'popover') {
-          $change.popover({
-            delay: { "show": 500, "hide": 100 },
-            html: true,
-            placement: 'auto',
-            content: title,
-            trigger: 'hover',
-            template: '<div class="popover ' + $change.attr("class") + '" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
-          });
-        }
-        else if (tootlip_ui == 'tooltip') {
-          $change.tooltip({
-            delay: { "show": 500, "hide": 100 },
-            html: true,
-            placement: 'auto',
-            title: title,
-            template:	'<div class="tooltip ' + $change.attr("class") + '" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
-          });
-        }
+        new Opentip($change, title);
       });
 
     }
@@ -166,20 +135,16 @@
 
         if (minutes < 1) {
           return Drupal.t('now');
-        }
-else if (minutes < 60) {
+        } else if (minutes < 60) {
           return Drupal.formatPlural(minutes, '1 minute ago', '@count minutes ago');
-        }
-else {
+        } else {
           return Drupal.t('on') + " " + Drupal.lite.padNumber(date.getHours(), 2) + ":" + Drupal.lite.padNumber(date.getMinutes(), 2);
         }
       // This year.
-      }
-else if (year == date.getFullYear()) {
+      } else if (year == date.getFullYear()) {
         // We remove year in the result.
-              return Drupal.t('on') + " " + datePicker.formatDate(drupalSettings.lite.tLocale.replace(/y/g, ''), date);
-      }
-else {
+        return Drupal.t('on') + " " + datePicker.formatDate(drupalSettings.lite.tLocale.replace(/y/g, ''), date);
+      } else {
         return Drupal.t('on') + " " + datePicker.formatDate(drupalSettings.lite.tLocale, date);
       }
     },
@@ -215,8 +180,7 @@ else {
     padString: function (s, length, padWith) {
       if (null === s || (typeof(s) === "undefined")) {
         s = "";
-      }
-else {
+      } else {
         s = String(s);
       }
       padWith = String(padWith);
