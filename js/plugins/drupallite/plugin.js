@@ -38,7 +38,7 @@
           node = drupalSettings.lite.node;
         }
         if (drupalSettings.lite.hasOwnProperty('debug')) {
-          Debug = drupalSettings.lite.debug;.
+          debug = drupalSettings.lite.debug;
         }
         debug && console.log(drupalSettings.lite);
       }
