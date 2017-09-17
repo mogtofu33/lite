@@ -9,6 +9,7 @@
 
   Drupal.lite = Drupal.lite || {};
 
+  // We use jQueryUI datepicker shipped with Drupal to format dates.
   var datePicker = $.datepicker.setDefaults($.datepicker.regional[drupalSettings.path.currentLanguage]);
 
   /**
@@ -54,8 +55,6 @@
      *
      * Src/lite/plugin.js#L1823
      *
-     * @param {object} datePicker
-     *   The Jquery UI Datepicker object.
      * @param {string} title
      *   The title template fromt Lite settings.
      * @param {jQuery} $elem
