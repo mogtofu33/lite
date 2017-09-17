@@ -48,20 +48,17 @@
       // Main permission check.
       checkPermission(key, permissions, user_can, debug);
 
-      // Text format permission.
+      // Text format permission or moderation permission.
       if (format && extra_permissions == 'permissions_by_formats') {
         debug && console.log('Check extra permissions for text format: ' + format);
         key = '_' + format;
         checkPermission(key, permissions, user_can, debug);
-      }
-      // Moderation permission.
-      else if (node && extra_permissions == 'permissions_by_states') {
+      } else if (node && extra_permissions == 'permissions_by_states') {
         debug && console.log('Check extra permissions by states: ' + node.workflow + '_' + node.state);
         if (node.moderated) {
           key = '_' + node.workflow + '_' + node.state;
           checkPermission(key, permissions, user_can, debug);
-        }
-        else {
+        } else {
           debug && console.log('Node not moderated.');
         }
       }
@@ -105,8 +102,7 @@
       if (!user_can[use_case] && permissions.indexOf(use_case + key) !== -1) {
         debug && console.log(use_case + ' ' + key + ': GRANTED');
         user_can[use_case] = true;
-      }
-      else {
+      } else {
         debug && console.log(use_case + ' ' + key + ': REFUSED');
       }
     });
