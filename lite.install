@@ -24,7 +24,7 @@ function lite_requirements($phase) {
       $requirements['lite_library']['severity'] = REQUIREMENT_ERROR;
       $requirements['lite_library']['description'] = [
         '#prefix' => ' ',
-        '#markup' => t('Lite module requires LITE plugin library 1.2.28. Composer based install recommended, see README.md file for instructions.'),
+        '#markup' => t('Lite module requires LITE plugin library 1.2.28. See README.md file for instructions.'),
       ];
     }
     else {
