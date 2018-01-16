@@ -12,6 +12,7 @@ Composer (Recommended)
 * To download this module fork, Lite library and opentip, using Composer template for Drupal
   https://github.com/drupal-composer/drupal-project, add these lines to your
   composer.json file:
+  
   ```
   "repositories": [
       { 
@@ -48,8 +49,8 @@ Composer (Recommended)
       "drupal/lite": "2.x-dev",
       "library/lite": "1.2.28",
       "library/opentip": "2.4.6"
-  },
-  ```
+  }
+```
 
 Then run
 
