@@ -9,12 +9,16 @@ Installation
 
 Composer (Recommended)
 
-* To download this module fork, Lite library and opentip, using Composer template for Drupal
-  https://github.com/drupal-composer/drupal-project, add these lines to your
-  composer.json file:
-  
+* To download this module fork, Lite library and opentip, using Composer 
+  template for Drupal https://github.com/drupal-composer/drupal-project,
+  add these lines to your repositories section on composer.json file:
+
   ```
   "repositories": [
+      {
+          "type": "composer",
+          "url": "https://packages.drupal.org/8"
+      },
       { 
           "type": "vcs", 
           "url": "https://github.com/Mogtofu33/lite"
@@ -44,19 +48,24 @@ Composer (Recommended)
         }
       }
   ],
+  ```
+
+* Add to the require section:
+
+  ```
   "require": {
-      ..... YOUR PACKAGES .....
       "drupal/lite": "2.x-dev",
       "library/lite": "1.2.28",
-      "library/opentip": "2.4.6"
+      "library/opentip": "2.4.6"
   }
-```
 
-Then run
+  ```
 
-```
-composer update
-```
+* Then run
+
+  ```
+  composer update
+  ```
 
 Manual
 
