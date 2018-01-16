@@ -7,84 +7,85 @@ https://ckeditor.com/addon/lite
 Installation
 ------------
 
-Composer (Recommended)
+  Composer (Recommended)
 
-* To download this module fork, Lite library and opentip, using Composer 
-  template for Drupal https://github.com/drupal-composer/drupal-project,
-  add these lines to your repositories section on composer.json file:
+  * To download this module fork, Lite library and opentip, using Composer 
+    template for Drupal https://github.com/drupal-composer/drupal-project,
+    add these lines to your repositories section on composer.json file:
 
-  ```
-  "repositories": [
-      {
-          "type": "composer",
-          "url": "https://packages.drupal.org/8"
-      },
-      { 
-          "type": "vcs", 
-          "url": "https://github.com/Mogtofu33/lite"
-      },
-      {
-        "type": "package",
-        "package": {
-          "name": "library/lite",
-          "version": "1.2.28",
-          "type": "drupal-library",
-          "dist": {
-            "url": "https://download.ckeditor.com/lite/releases/lite_1.2.28.zip",
-            "type": "zip"
+    ```
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        },
+        { 
+            "type": "vcs", 
+            "url": "https://github.com/Mogtofu33/lite"
+        },
+        {
+          "type": "package",
+          "package": {
+            "name": "library/lite",
+            "version": "1.2.28",
+            "type": "drupal-library",
+            "dist": {
+              "url": "https://download.ckeditor.com/lite/releases/lite_1.2.28.zip",
+              "type": "zip"
+            }
+          }
+        },
+        {
+          "type": "package",
+          "package": {
+            "name": "library/opentip",
+            "version": "2.4.6",
+            "type": "drupal-library",
+            "dist": {
+              "url": "https://github.com/enyo/opentip/archive/v2.4.6.tar.gz",
+              "type": "tar"
+            }
           }
         }
-      },
-      {
-        "type": "package",
-        "package": {
-          "name": "library/opentip",
-          "version": "2.4.6",
-          "type": "drupal-library",
-          "dist": {
-            "url": "https://github.com/enyo/opentip/archive/v2.4.6.tar.gz",
-            "type": "tar"
-          }
-        }
-      }
-  ],
-  ```
+    ],
+    ```
 
-* Add to the require section:
+  * Add to the require section:
 
-  ```
-  "require": {
-      "drupal/lite": "2.x-dev",
-      "library/lite": "1.2.28",
-      "library/opentip": "2.4.6"
-  }
+    ```
+    "require": {
+        "drupal/lite": "2.x-dev",
+        "library/lite": "1.2.28",
+        "library/opentip": "2.4.6"
+    }
 
-  ```
+    ```
 
-* Then run
+  * Then run
 
-  ```
-  composer update
-  ```
+    ```
+    composer update
+    ```
 
-Manual
+  Manual (Not recommended)
 
-* Download this module in /modules folder.
-* Download the version **1.2.28** of the LITE CKEditor plugin from
-  https://ckeditor.com/addon/lite and extract it to /libraries. The extracted
-  folder must be named lite. So Lite plugin file can be accessed from
-  _/libraries/lite/plugin.js_
-* **Optionnal** By default changes are only visible in the Wysywig editor, if you
-  want to display changes on the _view mode_ with _tooltip_ support you must install
-  **Opentip** library.
-  Create a folder opentip in your /libraries folder.
-  From https://github.com/enyo/opentip/tree/master/downloads, download
-  **opentip-jquery.min.js** and place it in /libraries/opentip, so your file can
-  be accessed from
-  _/libraries/opentip/opentip-jquery.min.js_
+  * Download this module in /modules folder.
+  * Download the version **1.2.28** of the LITE CKEditor plugin from
+    https://ckeditor.com/addon/lite and extract it to /libraries. The extracted
+    folder must be named lite. So Lite plugin file can be accessed from
+    _/libraries/lite/plugin.js_
+  * **Optionnal** By default changes are only visible in the Wysywig editor, if you
+    want to display changes on the _view mode_ with _tooltip_ support you must install
+    **Opentip** library.
+    Create a folder opentip in your /libraries folder.
+    From https://github.com/enyo/opentip/tree/master/downloads, download
+    **opentip-jquery.min.js** and place it in /libraries/opentip, so your file can
+    be accessed from
+    _/libraries/opentip/opentip-jquery.min.js_
   
 Post intallation
-  
+
+* Enable the module
 * Visit status report to ensure your Lite plugin is correctly loaded.
 * Enable any of the track changes buttons by dragging them into the active
   toolbar configuration for the desired text formats from the Text Formats
