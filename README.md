@@ -50,7 +50,9 @@ Composer (Recommended)
       "library/opentip": "2.4.6"
   },
   ```
-Then run 
+
+Then run
+
 ```
 composer update
 ```
