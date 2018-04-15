@@ -7,7 +7,7 @@ https://ckeditor.com/cke4/addon/lite
 Installation
 ------------
 
-  Composer (Recommended)
+### Composer (Recommended)
 
   * To download this module fork, Lite library and opentip, using Composer 
     template for Drupal https://github.com/drupal-composer/drupal-project,
@@ -56,7 +56,7 @@ Installation
     composer require "drupal/lite:2.x-dev" "library/lite:1.2.28" "library/opentip:2.4.6"
     ```
 
-  Manual (Not recommended)
+### Manual (Not recommended, use Composer)
 
   * Download this module in /modules folder.
   * Download the version **1.2.28** of the LITE CKEditor plugin from
@@ -73,19 +73,20 @@ Installation
     _/libraries/opentip/downloads/opentip-jquery.min.js_
     _Note_: you can remove all files from archive excepting downloads/opentip-jquery.min.js
   
-Post intallation
+### Post intallation
 
 * Enable the module
 * Visit status report to ensure your Lite plugin is correctly loaded.
 * Enable any of the track changes buttons by dragging them into the active
   toolbar configuration for the desired text formats from the Text Formats
-  configuration page.
-* Enable the Lite filter and configure
-* Configure Lite permissions to allow roles to toggle or resolve changes
-* If the Limit allowed HTML tags filter is enabled, add to the Allowed HTML tags:
+  configuration page (For example on /admin/config/content/formats/manage/basic_html).
+  * Configure Lite options below **CKEditor plugin settings**
+  * Enable the _Lite changes tracking_ under **Enabled filters**
+  * If the **Limit allowed HTML tags and correct faulty HTML** filter is enabled, add or replace to the **Allowed HTML tags** under the **Filter settings** :
   ```
   <del class="ice-del ice-cts-*" data-changedata data-userid data-cid data-last-change-time data-time data-username> <ins class="ice-ins ice-cts-*" data-changedata data-userid data-cid data-last-change-time data-time data-username>
   ```
+  * Configure the Lite options under **filter settings**
 
 Configuration
 ------------
@@ -95,6 +96,8 @@ configuration form.
 
 After the installation, you can configure specific options form
 /admin/config/content/lite/settings
+
+Some global permissions to allow roles to toggle or resolve changes for all text formats can be set from _People > Permissions_ (/admin/people/permissions#module-lite)
 
 Content moderation
 ------------
