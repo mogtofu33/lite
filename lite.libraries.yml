@@ -19,7 +19,7 @@ opentip:
     url: https://github.com/enyo/opentip#license
     gpl-compatible: true
   js:
-    /libraries/opentip/opentip-jquery.min.js: { minified: true }
+    /libraries/opentip/downloads/opentip-jquery.min.js: { minified: true }
   css:
     component:
       # Load css from Lite for consistency between Wysiwyg and front.
