@@ -53,7 +53,7 @@ Installation
   * Then run
 
     ```
-    composer require "drupal/lite:2.x-dev" "library/lite:1.2.28" "library/opentip":2.4.6"
+    composer require "drupal/lite:2.x-dev" "library/lite:1.2.28" "library/opentip:2.4.6"
     ```
 
   Manual (Not recommended)
