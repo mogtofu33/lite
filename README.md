@@ -68,9 +68,10 @@ Installation
     **Opentip** library.
     Create a folder opentip in your /libraries folder.
     From https://github.com/enyo/opentip/archive/v2.4.6.tar.gz, download
-    **opentip-jquery.min.js** and place it in /libraries/opentip/downloads, so your file can
+    **opentip-jquery.min.js** and place it in /libraries/opentip, so your file can
     be accessed from
     _/libraries/opentip/downloads/opentip-jquery.min.js_
+    _Note_: you can remove all files from archive excepting downloads/opentip-jquery.min.js
   
 Post intallation
 
