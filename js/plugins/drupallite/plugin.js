@@ -19,6 +19,11 @@
     // We are checking after init to be able to remove contextual menu items.
     afterInit: function (editor) {
 
+      // If no option mean no plugin.
+      if (typeof editor.config.lite == 'undefined') {
+        return;
+      }
+  
       var config = editor.config.lite.options,
           permissions = editor.config.lite.permissions,
           extra_permissions = editor.config.lite.extra_permissions,
