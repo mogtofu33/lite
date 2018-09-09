@@ -121,7 +121,9 @@ function lite_filter_process_format(&$element, FormStateInterface $form_state, &
         $element['#lite_node_values']['workflow'] = $workflow->id();
       }
       if (!$is_new) {
-        $element['#lite_node_values']['state'] = $entity->moderation_state->value;
+        if (isset($entity->moderation_state)) {
+          $element['#lite_node_values']['state'] = $entity->moderation_state->value;
+        }
       }
     }
     // We can add our pre_render callback to disable tracking depending options.
@@ -286,7 +288,7 @@ function lite_permissions_by_states($base_permissions) {
     // @codingStandardsIgnoreStart
     if ($workflow = \Drupal\workflows\Entity\Workflow::load($workflow_id)) {
       // @codingStandardsIgnoreEnd
-      $states = $workflow->getStates();
+      $states = $workflow->getTypePlugin()->getStates();
       foreach ($base_permissions as $base_permission => $tracking_info) {
         foreach ($states as $state) {
           $permissions[$base_permission . ' ' . $workflow_id . ' ' . $state->id()] = [
