@@ -176,6 +176,7 @@ function lite_disable_tracking($element) {
       if (!count($options)) {
         continue;
       }
+
       if (isset($options['moderation'])) {
         if ($options['moderation'] == 0 || $node['moderated'] == FALSE || $options['moderation_options'][$node['workflow']]['enable'] == 0) {
           // We are not dealing with a moderated or text format settings is
@@ -183,25 +184,30 @@ function lite_disable_tracking($element) {
           // to disable it when not enable by default or disabled on new
           // entities.
           if ($options['auto_start'] == 0 || ($is_new && $options['disable_new'] == 1)) {
+            $editor_settings['lite']['tracking_disabled_reason'] = 'Not enable by default or disabled on new';
             $tracking = FALSE;
           }
-          continue;
+        }
+        // For an exisitng node, apply the setting for this Workflow state.
+        elseif($options['moderation'] == 1) {
+          if (isset($options['moderation_options'][$node['workflow']][$node['state']])) {
+            $options = $options['moderation_options'][$node['workflow']][$node['state']];
+            if ($options['auto_start'] == 0) {
+              $editor_settings['lite']['tracking_disabled_reason'] = 'Disable for this moderation state: ' . $node['workflow'] . '::' . $node['state'];
+              $tracking = FALSE;
+            }
+          }
         }
       }
 
       // It's a new node without state, so check new entity setting.
       if ($is_new) {
         if ($options['disable_new'] == 1) {
+          $editor_settings['lite']['tracking_disabled_reason'] = 'Not start tracking on New entity';
           $tracking = FALSE;
         }
       }
-      // For an exisitng node, apply the setting for this Workflow state.
-      elseif (isset($options['moderation_options'][$node['workflow']][$node['state']])) {
-        $options = $options['moderation_options'][$node['workflow']][$node['state']];
-        if ($options['auto_start'] == 0) {
-          $tracking = FALSE;
-        }
-      }
+
       $editor_settings['lite']['isTracking'] = $tracking;
     }
   }
