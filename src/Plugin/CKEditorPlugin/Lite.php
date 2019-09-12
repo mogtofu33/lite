@@ -17,6 +17,7 @@ use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Defines the "lite" plugin.
@@ -28,6 +29,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInterface, ContainerFactoryPluginInterface {
+  use StringTranslationTrait;
 
   /**
    * The current user account service.
@@ -168,27 +170,27 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
 
     return [
       'lite-acceptall' => [
-        'label' => t('Accept all changes'),
+        'label' => $this->t('Accept all changes'),
         'image' => $path . '/icons/lite-acceptall.png',
       ],
       'lite-rejectall' => [
-        'label' => t('Reject all changes'),
+        'label' => $this->t('Reject all changes'),
         'image' => $path . '/icons/lite-rejectall.png',
       ],
       'lite-acceptone' => [
-        'label' => t('Accept change'),
+        'label' => $this->t('Accept change'),
         'image' => $path . '/icons/lite-acceptone.png',
       ],
       'lite-rejectone' => [
-        'label' => t('Reject change'),
+        'label' => $this->t('Reject change'),
         'image' => $path . '/icons/lite-rejectone.png',
       ],
       'lite-toggleshow' => [
-        'label' => t('Show/hide tracked changes'),
+        'label' => $this->t('Show/hide tracked changes'),
         'image' => $path . '/icons/lite-toggleshow.png',
       ],
       'lite-toggletracking' => [
-        'label' => t('Start/stop tracking changes'),
+        'label' => $this->t('Start/stop tracking changes'),
         'image' => $path . '/icons/lite-toggletracking.png',
       ],
     ];
@@ -215,8 +217,8 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
     }
 
     $form['auto_start'] = [
-      '#title' => t('Enable tracking changes by default'),
-      '#description' => t('Enable Lite tracking when the editor is loaded with this text format.'),
+      '#title' => $this->t('Enable tracking changes by default'),
+      '#description' => $this->t('Enable Lite tracking when the editor is loaded with this text format.'),
       '#type' => 'checkbox',
       '#default_value' => isset($config['auto_start']) ? $config['auto_start'] : 1,
       '#attributes' => [
@@ -225,8 +227,8 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
     ];
 
     $form['disable_new'] = [
-      '#title' => t('Do not start tracking on <em>New</em> entity'),
-      '#description' => t('Prevent users from becoming confused if their initial content does not show up after saving the entity without accepting any change.'),
+      '#title' => $this->t('Do not start tracking on <em>New</em> entity'),
+      '#description' => $this->t('Prevent users from becoming confused if their initial content does not show up after saving the entity without accepting any change.'),
       '#type' => 'checkbox',
       '#default_value' => isset($config['disable_new']) ? $config['disable_new'] : 0,
     ];
@@ -237,7 +239,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
         ':url_lite' => $this->urlGenerator->generateFromRoute('lite.lite_settings_form'),
       ];
       $form['moderation'] = [
-        '#title' => t('Enable content moderation support'),
+        '#title' => $this->t('Enable content moderation support'),
         '#description' => $this->t('Extend Lite options by <a href=":url">Workflows</a> states for this text format. Can be extended using the <a href=":url_lite">permissions by states</a>.', $params),
         '#type' => 'checkbox',
         '#default_value' => isset($config['moderation']) ? $config['moderation'] : 0,
@@ -266,12 +268,12 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
         foreach ($options as $worflow_id => $label) {
 
           $form['moderation_options'][$worflow_id] = [
-            '#title' => t(':label', [':label' => $label]),
+            '#title' => $this->t(':label', [':label' => $label]),
             '#type' => 'details',
           ];
 
           $form['moderation_options'][$worflow_id]['enable'] = [
-            '#title' => t('Override options for this Workflow'),
+            '#title' => $this->t('Override options for this Workflow'),
             '#type' => 'checkbox',
             '#default_value' => isset($config['moderation_options'][$worflow_id]['enable']) ? $config['moderation_options'][$worflow_id]['enable'] : 0,
             '#attributes' => [
@@ -299,7 +301,7 @@ class Lite extends CKEditorPluginBase implements CKEditorPluginConfigurableInter
               $default = 0;
             }
             $form['moderation_options'][$worflow_id][$state_id]['auto_start'] = [
-              '#title' => t('%state: enable tracking changes by default', ['%state' => $state_label]),
+              '#title' => $this->t('%state: enable tracking changes by default', ['%state' => $state_label]),
               '#type' => 'checkbox',
               '#default_value' => $default,
               '#states' => [

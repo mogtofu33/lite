@@ -29,7 +29,7 @@ class Lite extends FilterBase {
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $form['view'] = [
-      '#title' => t('Show changes on view mode'),
+      '#title' => $this->t('Show changes on view mode'),
       '#description' => $this->t('Display track changes in view mode with tooltips. If disable track changes will be visible only when editing.'),
       '#type' => 'checkbox',
       '#default_value' => $this->settings['view'],
@@ -43,8 +43,8 @@ class Lite extends FilterBase {
       ],
     ];
     $form['clean'] = [
-      '#title' => t('Clean empty markup when hiding changes'),
-      '#description' => $this->t('If track chnages are not displayed on view mode, when a change or a list of changes is included in a list or a container tag, changes will be hidden but not the container tag. In some cases, like for list or Blockquote, an empty markup will be visible. Use this option to remove empty tags.'),
+      '#title' => $this->t('Clean empty markup when hiding changes'),
+      '#description' => $this->t('If track changes are not displayed on view mode, when a change or a list of changes is included in a list or a container tag, changes will be hidden but not the container tag. In some cases, like for list or Blockquote, an empty markup will be visible. Use this option to remove empty tags.'),
       '#type' => 'checkbox',
       '#default_value' => $this->settings['clean'],
       '#attributes' => [
@@ -58,7 +58,7 @@ class Lite extends FilterBase {
     ];
     $form['list'] = [
       '#type' => 'textfield',
-      '#title' => t('Empty HTML tags to clean'),
+      '#title' => $this->t('Empty HTML tags to clean'),
       '#default_value' => $this->settings['list'],
       '#description' => $this->t('Space separated list of markup to clean, for example lists or blockquote. Be warned it will remove all empty markup even if it is not related to track changes.'),
       '#states' => [

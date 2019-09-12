@@ -41,9 +41,9 @@
   };
 
   /**
-   * Lite helpers functions adapatted from Lite plugin.
+   * Lite helpers functions adapted from Lite plugin.
    *
-   * These functions are just Drupal rewriten function of lite:
+   * These functions are just Drupal rewritten function of lite:
    * https://github.com/loopindex/ckeditor-track-changes/blob/master/src/lite/plugin.js.
    *
    * @namespace
@@ -56,7 +56,7 @@
      * Src/lite/plugin.js#L1823
      *
      * @param {string} title
-     *   The title template fromt Lite settings.
+     *   The title template from Lite settings.
      * @param {jQuery} $elem
      *   A jQuery element containing Lite tag ins or del.
      *
@@ -102,7 +102,7 @@
           '@H': lastTime.getHours(),
         };
 
-      // Build text message using params replacment.
+      // Build text message using params replacement.
       return Drupal.t(title, params);
     },
 
