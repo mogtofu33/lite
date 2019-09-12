@@ -141,7 +141,7 @@ Build:
     - mkdir -p ${WEB_ROOT}/libraries
     - curl -f -N https://download.ckeditor.com/lite/releases/lite_1.2.28.zip -o ${WEB_ROOT}/libraries/lite.zip
     - curl -f -N https://github.com/enyo/opentip/archive/v2.4.6.tar.gz -o ${WEB_ROOT}/libraries/opentip.tar.gz
-    - cd {WEB_ROOT}/libraries/
+    - cd ${WEB_ROOT}/libraries/
     - unzip lite.zip
     - tar -xvzf opentip.tar.gz
     - ls -lAh
