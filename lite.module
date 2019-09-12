@@ -53,9 +53,6 @@ function lite_help($route_name, RouteMatchInterface $route_match) {
       $output .= t('A debug option on Lite settings can help you check your configuration.');
       $output .= '</p>';
       return $output;
-
-    break;
-
   }
 }
 
@@ -189,7 +186,7 @@ function lite_disable_tracking($element) {
           }
         }
         // For an exisitng node, apply the setting for this Workflow state.
-        elseif($options['moderation'] == 1) {
+        elseif ($options['moderation'] == 1) {
           if (isset($options['moderation_options'][$node['workflow']][$node['state']])) {
             $options = $options['moderation_options'][$node['workflow']][$node['state']];
             if ($options['auto_start'] == 0) {
