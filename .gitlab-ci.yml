@@ -144,8 +144,7 @@ Build:
     - cd ${WEB_ROOT}/libraries/
     - unzip -q lite.zip
     - tar -xzf opentip.tar.gz
-    - mv opentip-2* opentip 
-    - ls -lAh
+    - mv opentip-2* opentip
   variables:
     <<: *test_variables
   # [CI_TYPE] When using included Drupal for a module or a theme, the
